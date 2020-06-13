@@ -8,36 +8,21 @@ using System.Collections.Generic;
 namespace BtcTurk.Net.Objects.SocketObjects
 {
     /*
-    internal abstract class BtcTurkResponse
+    [JsonConverter(typeof(ArrayConverter))]
+    public class BtcTurkSocketResponse<T> : IConvertible
     {
-        internal abstract bool Success { get; }
-        /*
-        [JsonProperty("err-code")]
-        public string ErrorCode { get; set; }
-        [JsonProperty("err-msg")]
-        public string ErrorMessage { get; set; }
-        * /
+        [ArrayProperty(0)]
+        public int Model { get; set; }
+        [ArrayProperty(1)]
+        public T Data { get; set; }
     }
     */
 
     [JsonConverter(typeof(WSObjectConverter))]
-    public class BtcTurkSocketResponse // : BtcTurkResponse
+    public class BtcTurkSocketResponse
     {
-        // internal override bool Success => true; // OK == true;
-
-        public int Type { get; set; }
-        public string Data { get; set; }
-
-        /*
-        [JsonProperty("type")]
-        public int Type { get; set; }
-        [JsonProperty("id")]
-        public int Id { get; set; }
-        [JsonProperty("ok")]
-        public bool OK { get; set; }
-        [JsonProperty("message")]
-        public string Message { get; set; }
-        */
+        public int Model { get; set; }
+        public string Data { get; set; } = "";
     }
 
     internal class WSObjectConverter : JsonConverter
@@ -45,7 +30,7 @@ namespace BtcTurk.Net.Objects.SocketObjects
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var foo = value as BtcTurkSocketResponse;
-            var obj = new object[] { foo.Type, foo.Data };
+            var obj = new object[] { foo.Model, foo.Data };
             serializer.Serialize(writer, obj);
         }
 
@@ -54,7 +39,7 @@ namespace BtcTurk.Net.Objects.SocketObjects
             var arr = ReadArrayObject(reader, serializer);
             return new BtcTurkSocketResponse
             {
-                Type = (int)arr[0],
+                Model = (int)arr[0],
                 Data = arr[1].ToString(),
             };
         }
@@ -71,48 +56,5 @@ namespace BtcTurk.Net.Objects.SocketObjects
         {
             return objectType == typeof(BtcTurkSocketResponse);
         }
-    }
-
-    public class BtcTurkSocketBaseResponse
-    {
-        [JsonProperty("type")]
-        public int Type { get; set; }
-        [JsonProperty("channel")]
-        public string Channel { get; set; }
-        [JsonProperty("event")]
-        public string Event { get; set; }
-        [JsonProperty("join")]
-        public bool Join { get; set; }
-        public BtcTurkSocketBaseResponse()
-        {
-        }
-
-        public BtcTurkSocketBaseResponse(int type, string channel, string evt, bool join)
-        {
-            Type = type;
-            Channel = channel;
-            Event = evt;
-            Join = join;
-        }
-
-        public object[] RequestObject()
-        {
-            return new object[] { this.Type, JsonConvert.SerializeObject(this) };
-        }
-
-        public string RequestString()
-        {
-            return JsonConvert.SerializeObject(this.RequestObject());
-        }
-    }
-
-    public class BtcTurkWelcomeResponse
-    {
-        [JsonProperty("type")]
-        public int Type { get; set; }
-        [JsonProperty("current")]
-        public string Current { get; set; }
-        [JsonProperty("min")]
-        public string Min { get; set; }
     }
 }

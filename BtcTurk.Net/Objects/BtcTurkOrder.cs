@@ -17,9 +17,9 @@ namespace BtcTurk.Net.Objects
         [JsonProperty("quantity")]
         public decimal Quantity { get; set; }
         [JsonProperty("pairSymbol")]
-        public string PairSymbol { get; set; }
+        public string PairSymbol { get; set; } = "";
         [JsonProperty("pairSymbolNormalized")]
-        public string PairSymbolNormalized { get; set; }
+        public string PairSymbolNormalized { get; set; } = "";
         [JsonProperty("type"), JsonConverter(typeof(OrderSideConverter))]
         public BtcTurkOrderSide Side { get; set; }
         [JsonProperty("method"), JsonConverter(typeof(OrderMethodConverter))]

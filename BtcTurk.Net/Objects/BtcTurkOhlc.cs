@@ -8,9 +8,9 @@ namespace BtcTurk.Net.Objects
     public class BtcTurkOhlc
     {
         [JsonProperty("pairSymbol")]
-        public string PairSymbol { get; set; }
+        public string PairSymbol { get; set; } = "";
         [JsonProperty("pairNormalized")]
-        public string PairNormalized { get; set; }
+        public string PairNormalized { get; set; } = "";
 
         [JsonProperty("time"), JsonConverter(typeof(TimestampConverter))]
         public DateTime Time { get; set; }

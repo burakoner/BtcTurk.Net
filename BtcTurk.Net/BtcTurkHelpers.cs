@@ -85,5 +85,20 @@ namespace BtcTurk.Net
             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             return Convert.ToInt64((date - epoch).TotalSeconds) * 1000;
         }
+
+        public static bool IsOneOf(this int @this, params int[] values)
+        {
+            return Array.IndexOf(values, @this) != -1;
+        }
+
+        public static bool IsOneOf(this string @this, params string[] values)
+        {
+            return Array.IndexOf(values, @this) != -1;
+        }
+
+        public static bool IsOneOf(this decimal @this, params decimal[] values)
+        {
+            return Array.IndexOf(values, @this) != -1;
+        }
     }
 }

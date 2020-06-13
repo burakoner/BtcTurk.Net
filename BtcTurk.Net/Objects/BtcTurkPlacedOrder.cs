@@ -17,15 +17,15 @@ namespace BtcTurk.Net.Objects
         [JsonProperty("stopPrice")]
         public decimal? StopPrice { get; set; }
         [JsonProperty("newOrderClientId")]
-        public string ClientOrderId { get; set; }
+        public string ClientOrderId { get; set; } = "";
         [JsonProperty("type"), JsonConverter(typeof(OrderSideConverter))]
         public BtcTurkOrderSide Side { get; set; }
         [JsonProperty("method"), JsonConverter(typeof(OrderMethodConverter))]
         public BtcTurkOrderMethod Method { get; set; }
         [JsonProperty("pairSymbol")]
-        public string PairSymbol { get; set; }
+        public string PairSymbol { get; set; } = "";
         [JsonProperty("pairSymbolNormalized")]
-        public string PairSymbolNormalized { get; set; }
+        public string PairSymbolNormalized { get; set; } = "";
         [JsonProperty("datetime"), JsonConverter(typeof(TimestampConverter))]
         public DateTime Datetime { get; set; }
     }

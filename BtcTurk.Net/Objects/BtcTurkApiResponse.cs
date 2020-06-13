@@ -12,7 +12,7 @@ namespace BtcTurk.Net.Objects
         internal bool Success { get; set; }
         
         [JsonOptionalProperty, JsonProperty("message")]
-        internal string ErrorMessage { get; set; }
+        internal string ErrorMessage { get; set; } = "";
         [JsonOptionalProperty, JsonProperty("code")]
         internal int ErrorCode { get; set; }
 
