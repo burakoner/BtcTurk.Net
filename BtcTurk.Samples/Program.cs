@@ -1,4 +1,5 @@
 ﻿using BtcTurk.Net;
+using BtcTurk.Net.Objects.SocketObjects;
 using CryptoExchange.Net.Sockets;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,79 @@ namespace BtcTurk.Samples
     {
         static void Main(string[] args)
         {
+            // Variables
+            var dictOrderBook = new Dictionary<string, BtcTurkStreamOrderBookFull>();
+            var dictTickers = new Dictionary<string, BtcTurkStreamTickerRow>();
+
+            // Objects
+            var sock = new BtcTurkSocketClient();
+            var cli = new BtcTurkClient();
+            cli.SetApiCredentials("APIKEY", "APISECRET");
+
+            // Order Book Full
+            var pairs = new List<string> {
+                "ATOMTRY","BTCTRY","DASHTRY","EOSTRY","ETHTRY","LINKTRY","LTCTRY","NEOTRY","USDTTRY","XLMTRY","XRPTRY","XTZTRY",
+                "ATOMUSDT","BTCUSDT","DASHUSDT","EOSUSDT","ETHUSDT","LINKUSDT","LTCUSDT","NEOUSDT","XLMUSDT","XRPUSDT","XTZUSDT",
+                "ATOMBTC","DASHBTC","EOSBTC","ETHBTC","LINKBTC","LTCBTC","NEOBTC","XLMBTC","XRPBTC","XTZBTC"
+            };
+            foreach (var pair in pairs)
+            {
+                sock.SubscribeToOrderBookFull(pair, (data) =>
+                {
+                    if (data != null)
+                    {
+                        dictOrderBook[pair] = data;
+                    }
+                });
+            }
+
+            // All Tickers
+            sock.SubscribeToTickers((data) =>
+            {
+                if (data != null)
+                {
+                    foreach (var ticker in data.Items)
+                    {
+                        dictTickers[ticker.PairSymbol] = ticker;
+
+                        Console.WriteLine($"Channel: {data.Channel} Event:{data.Event} Type:{data.Type} >> " +
+                            $"B:{ticker.Bid} A:{ticker.Ask} PS:{ticker.PairSymbol} NS:{ticker.NumeratorSymbol} DS:{ticker.DenominatorSymbol} " +
+                            $"O:{ticker.Open} H:{ticker.High} L:{ticker.Low} LA:{ticker.Close} V:{ticker.Volume} " +
+                            $"AV:{ticker.AveragePrice} D:{ticker.DailyChange} DP:{ticker.DailyChangePercent} PId:{ticker.PairId} Ord:{ticker.OrderNum} ");
+
+                        var algorithm = false;
+                        // TODO: Trade Algorithm
+
+                        if (algorithm)
+                        {
+                            if (dictOrderBook.ContainsKey(ticker.PairSymbol))
+                            {
+                                var order = cli.PlaceOrder(
+                                    pairSymbol: ticker.PairSymbol,
+                                    price: dictOrderBook[ticker.PairSymbol].Asks[0].Price,
+                                    quantity: dictOrderBook[ticker.PairSymbol].Asks[0].Amount,
+                                    orderSide: Net.Objects.BtcTurkOrderSide.Buy,
+                                    orderMethod: Net.Objects.BtcTurkOrderMethod.Market
+                                    );
+                            }
+                        }
+
+                    }
+                }
+            });
+
+            /**/
+
+
+
+            Console.ReadLine();
+
+
+
+            Console.ReadLine();
+#if AAA
+
+
             var pairs = new List<string> {
                 "ATOMTRY","BTCTRY","DASHTRY","EOSTRY","ETHTRY","LINKTRY","LTCTRY","NEOTRY","USDTTRY","XLMTRY","XRPTRY","XTZTRY",
                 "ATOMUSDT","BTCUSDT","DASHUSDT","EOSUSDT","ETHUSDT","LINKUSDT","LTCUSDT","NEOUSDT","XLMUSDT","XRPUSDT","XTZUSDT",
@@ -186,6 +260,27 @@ namespace BtcTurk.Samples
             /**/
 
             Console.ReadLine();
+
+
+            var cliOptions = new BtcTurk.Net.BtcTurkClientOptions
+            {
+                // Rate Limiters
+                RateLimiters = new List<CryptoExchange.Net.Interfaces.IRateLimiter>
+                {
+                    // 60 Saniyede 1000 Request
+                    new CryptoExchange.Net.RateLimiter.RateLimiterTotal(600, TimeSpan.FromMilliseconds(60*1000)),
+
+                    // 15 Saniyede 100 Request
+                    new CryptoExchange.Net.RateLimiter.RateLimiterTotal(100, TimeSpan.FromSeconds(15)),
+                },
+
+                // Rate Limiting Behaviour
+                RateLimitingBehaviour = CryptoExchange.Net.Objects.RateLimitingBehaviour.Wait,
+            };
+            BtcTurk.Net.BtcTurkClient.SetDefaultOptions(cliOptions);
+
+
+#endif
         }
     }
 }

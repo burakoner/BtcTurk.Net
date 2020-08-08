@@ -15,8 +15,8 @@ namespace BtcTurk.Net.Objects
 
         public DateTime OpenDateTime
         {
-            get { return _openTime.FromUnixTimeMilliSeconds(); }
-            set { _openTime = value.ToUnixTimeMilliSeconds(); }
+            get { return _openTime.FromUnixTimeMilliseconds(); }
+            set { _openTime = value.ToUnixTimeMilliseconds(); }
         }
 
         public decimal Open { get; set; }

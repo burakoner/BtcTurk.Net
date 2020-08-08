@@ -36,7 +36,7 @@ namespace BtcTurk.Net
                 var sign = string.Empty;
                 var apiKey = Credentials.Key.GetString();
                 var apiSecret = Credentials.Secret.GetString();
-                var nonce = DateTime.UtcNow.ToUnixTimeMilliSeconds();
+                var nonce = DateTime.UtcNow.ToUnixTimeMilliseconds();
                 string message = apiKey + nonce;
                 using (HMACSHA256 hmac = new HMACSHA256(Convert.FromBase64String(apiSecret)))
                 {
