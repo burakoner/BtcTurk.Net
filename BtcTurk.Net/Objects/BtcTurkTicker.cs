@@ -8,10 +8,10 @@ namespace BtcTurk.Net.Objects
     public class BtcTurkTicker
     {
         [JsonProperty("pair")]
-        public string Pair { get; set; }
+        public string Pair { get; set; } = "";
         [JsonProperty("pairNormalized")]
-        public string PairNormalized { get; set; }
-        
+        public string PairNormalized { get; set; } = "";
+
         [JsonProperty("timestamp"), JsonConverter(typeof(TimestampConverter))]
         public DateTime Timestamp { get; set; }
 
@@ -38,9 +38,9 @@ namespace BtcTurk.Net.Objects
         [JsonProperty("dailyPercent")]
         public decimal DailyPercent { get; set; }
         [JsonProperty("denominatorSymbol")]
-        public string DenominatorSymbol { get; set; }
+        public string DenominatorSymbol { get; set; } = "";
         [JsonProperty("numeratorSymbol")]
-        public string NumeratorSymbol { get; set; }
+        public string NumeratorSymbol { get; set; } = "";
         [JsonProperty("order")]
         public int Order { get; set; }
     }

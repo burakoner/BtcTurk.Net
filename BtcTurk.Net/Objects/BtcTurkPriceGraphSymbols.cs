@@ -9,9 +9,9 @@ namespace BtcTurk.Net.Objects
     public class BtcTurkPriceGraphSymbols
     {
         [JsonProperty("symbol")]
-        public string Symbol { get; set; }
+        public string Symbol { get; set; } = "";
         [JsonProperty("description")]
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
         [JsonProperty("minmov")]
         public decimal MinMov { get; set; }
         [JsonProperty("minmov2")]
@@ -21,11 +21,11 @@ namespace BtcTurk.Net.Objects
         [JsonProperty("has_dwm")]
         public bool HasDwm { get; set; }
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public string Type { get; set; } = "";
         [JsonProperty("ticker")]
-        public string Ticker { get; set; }
+        public string Ticker { get; set; } = "";
         [JsonProperty("timezone")]
-        public string Timezone { get; set; }
+        public string Timezone { get; set; } = "";
         [JsonProperty("has_seconds")]
         public bool HasSeconds { get; set; }
         [JsonProperty("has_weekly_and_monthly")]
@@ -37,14 +37,14 @@ namespace BtcTurk.Net.Objects
         [JsonProperty(PropertyName = "intraday_multipliers", ItemConverterType = typeof(PeriodEnumConverter))]
         public BtcTurkPeriod[] IntradayMultipliers { get; set; }
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         [JsonProperty("exchange-listed")]
-        public string ExchangeListed { get; set; }
+        public string ExchangeListed { get; set; } = "";
         [JsonProperty("exchange-traded")]
-        public string ExchangeTraded { get; set; }
+        public string ExchangeTraded { get; set; } = "";
         [JsonProperty("has_no_volume")]
         public bool HasNoVolume { get; set; }
         [JsonProperty("session")]
-        public string Session { get; set; }
+        public string Session { get; set; } = "";
     }
 }

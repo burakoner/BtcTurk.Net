@@ -15,9 +15,9 @@ namespace BtcTurk.Net.Objects
         [JsonProperty("amount")]
         public decimal Amount { get; set; }
         [JsonProperty("numeratorSymbol")]
-        public string NumeratorSymbol { get; set; }
+        public string NumeratorSymbol { get; set; } = "";
         [JsonProperty("denominatorSymbol")]
-        public string DenominatorSymbol { get; set; }
+        public string DenominatorSymbol { get; set; } = "";
         [JsonProperty("orderType"), JsonConverter(typeof(OrderSideConverter))]
         public BtcTurkOrderSide Side { get; set; }
         [JsonProperty("timestamp"), JsonConverter(typeof(TimestampConverter))]

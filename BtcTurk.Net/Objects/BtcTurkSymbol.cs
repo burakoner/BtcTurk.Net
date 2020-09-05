@@ -11,15 +11,15 @@ namespace BtcTurk.Net.Objects
         [JsonProperty("id")]
         public int Id { get; set; }
         [JsonProperty("name")]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         [JsonProperty("nameNormalized")]
-        public string nameNormalized { get; set; }
+        public string nameNormalized { get; set; } = "";
         [JsonProperty("status"), JsonConverter(typeof(SymbolStatusConverter))]
         public BtcTurkSymbolStatus Status { get; set; }
         [JsonProperty("numerator")]
-        public string Numerator { get; set; }
+        public string Numerator { get; set; } = "";
         [JsonProperty("denominator")]
-        public string Denominator { get; set; }
+        public string Denominator { get; set; } = "";
         [JsonProperty("numeratorScale")]
         public int NumeratorScale { get; set; }
         [JsonProperty("denominatorScale")]

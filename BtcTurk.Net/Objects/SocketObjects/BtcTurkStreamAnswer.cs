@@ -6,13 +6,15 @@ using System;
 
 namespace BtcTurk.Net.Objects.SocketObjects
 {
-    public class BtcTurkStream
+    public class BtcTurkStreamAnswer
     {
-        [JsonProperty("channel")]
-        public string Channel { get; set; } = "";
-        [JsonProperty("event")]
-        public string Event { get; set; } = "";
         [JsonProperty("type")]
         public int Type { get; set; }
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        [JsonProperty("ok")]
+        public bool OK { get; set; }
+        [JsonProperty("message")]
+        public string Message { get; set; } = "";
     }
 }

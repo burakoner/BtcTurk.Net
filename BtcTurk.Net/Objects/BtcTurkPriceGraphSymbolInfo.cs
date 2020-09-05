@@ -13,9 +13,9 @@ namespace BtcTurk.Net.Objects
         [JsonProperty("description")]
         public string[] Description { get; set; }
         [JsonProperty("exchange_listed")]
-        public string ExchangeListed { get; set; }
+        public string ExchangeListed { get; set; } = "";
         [JsonProperty("exchange_traded")]
-        public string ExchangeTraded { get; set; }
+        public string ExchangeTraded { get; set; } = "";
         [JsonProperty("minmov")]
         public decimal MinMov { get; set; }
         [JsonProperty("minmov2")]
@@ -29,8 +29,8 @@ namespace BtcTurk.Net.Objects
         [JsonProperty("ticker")]
         public string[] Ticker { get; set; }
         [JsonProperty("timezone")]
-        public string Timezone { get; set; }
+        public string Timezone { get; set; } = "";
         [JsonProperty("session_regular")]
-        public string SessionRegular { get; set; }
+        public string SessionRegular { get; set; } = "";
     }
 }

@@ -9,19 +9,19 @@ namespace BtcTurk.Net.Objects
     public class BtcTurkTrade
     {
         [JsonProperty("pair")]
-        public string PairSymbol { get; set; }
+        public string PairSymbol { get; set; } = "";
         [JsonProperty("pairNormalized")]
-        public string PairNormalized { get; set; }
+        public string PairNormalized { get; set; } = "";
         [JsonProperty("numerator")]
-        public string Numerator { get; set; }
+        public string Numerator { get; set; } = "";
         [JsonProperty("denominator")]
-        public string Denominator { get; set; }
+        public string Denominator { get; set; } = "";
 
         [JsonProperty("date"), JsonConverter(typeof(TimestampConverter))]
         public DateTime Time { get; set; }
 
         [JsonProperty("tid")]
-        public string TradeId { get; set; }
+        public string TradeId { get; set; } = "";
 
         [JsonProperty("price")]
         public decimal Price { get; set; }
