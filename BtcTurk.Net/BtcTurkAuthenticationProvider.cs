@@ -26,7 +26,7 @@ namespace BtcTurk.Net
             this.arraySerialization = arraySerialization;
         }
 
-        public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
+        public override Dictionary<string, string> AddAuthenticationToHeaders(string uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postParameterPosition, ArrayParametersSerialization arraySerialization)
         {
             if (Credentials.Key == null || Credentials.Secret == null)
                 throw new ArgumentException("No valid API credentials provided. Key/Secret needed.");

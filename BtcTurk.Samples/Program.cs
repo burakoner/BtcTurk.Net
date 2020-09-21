@@ -17,6 +17,31 @@ namespace BtcTurk.Samples
                 "ATOMBTC","DASHBTC","EOSBTC","ETHBTC","LINKBTC","LTCBTC","NEOBTC","XLMBTC","XRPBTC","XTZBTC"
             };
 
+            /* BtcTurkClient Object */
+            BtcTurkClient apiClient = new BtcTurkClient();
+
+            // Public Api Endpoints:
+            var btc00 = apiClient.GetServerVersion();
+            var btc01 = apiClient.GetServerTime();
+            var btc02 = apiClient.GetServerVersion();
+            var btc03 = apiClient.GetServerExchangeInfo();
+            var btc04 = apiClient.GetServerPing();
+            var btc05 = apiClient.GetTicker("BTCTRY");
+            var btc06 = apiClient.GetTradesV2("BTCTRY");
+            var btc07 = apiClient.GetPriceGraphHistory("BTCTRY", Net.Objects.BtcTurkPeriod.OneHour);
+            // ...
+
+            // Private Api Endpoints:
+            apiClient.SetApiCredentials("XXXXXXXX-API-KEY-XXXXXXXX", "XXXXXXXX-API-SECRET-XXXXXXXX");
+            var btc11 = apiClient.GetBalances();
+            var btc12 = apiClient.PlaceOrder("BTCTRY", 1.0m, Net.Objects.BtcTurkOrderSide.Buy, Net.Objects.BtcTurkOrderMethod.Market);
+            // ...
+
+            Console.ReadLine();
+
+
+
+
             /* BtcTurkSocketClient Object */
             var sock = new BtcTurkSocketClient(new BtcTurkSocketClientOptions { LogVerbosity = CryptoExchange.Net.Logging.LogVerbosity.Debug });
 
@@ -187,7 +212,6 @@ namespace BtcTurk.Samples
             /**/
 
             Console.ReadLine();
-
 
         }
     }

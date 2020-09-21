@@ -352,7 +352,7 @@ namespace BtcTurk.Net
             if (authProvider == null)
                 return new CallResult<bool>(false, new NoApiCredentialsError());
 
-            var authParams = authProvider.AddAuthenticationToParameters(""/*baseAddressAuthenticated*/, HttpMethod.Get, new Dictionary<string, object>(), true);
+            var authParams = authProvider.AddAuthenticationToParameters(""/*baseAddressAuthenticated*/, HttpMethod.Get, new Dictionary<string, object>(), true, PostParameters.InBody, ArrayParametersSerialization.Array);
             var authObjects = new BtcTurkAuthenticationRequest
             {
                 AccessKeyId = authProvider.Credentials.Key.GetString(),

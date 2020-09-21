@@ -645,14 +645,14 @@ namespace BtcTurk.Net
         #endregion
 
         #region Private Methods
-        protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed)
+        protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postPosition, ArrayParametersSerialization arraySerialization, int requestId)
         {
             if (parameters == null)
                 parameters = new Dictionary<string, object>();
 
             var uriString = uri.ToString();
             if (authProvider != null)
-                parameters = authProvider.AddAuthenticationToParameters(uriString, method, parameters, signed);
+                parameters = authProvider.AddAuthenticationToParameters(uriString, method, parameters, signed, postPosition, arraySerialization);
 
             if ((method == HttpMethod.Get || method == HttpMethod.Delete|| postParametersPosition == PostParameters.InUri) && parameters?.Any() == true)
                 uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
@@ -665,13 +665,13 @@ namespace BtcTurk.Net
                 parameters = parameters.Where(p => !uriParamNames.Contains(p.Key)).ToDictionary(k => k.Key, k => k.Value);
             }
 
-            var request = RequestFactory.Create(method, uriString);
+            var request = RequestFactory.Create(method, uriString, requestId);
             var contentType = requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader;
             request.Accept = Constants.JsonContentHeader;
             
             var headers = new Dictionary<string, string>();
             if (authProvider != null)
-                headers = authProvider.AddAuthenticationToHeaders(uriString, method, parameters, signed);
+                headers = authProvider.AddAuthenticationToHeaders(uriString, method, parameters!, signed, postPosition, arraySerialization);
 
             foreach (var header in headers)
                 request.AddHeader(header.Key, header.Value);

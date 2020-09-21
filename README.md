@@ -297,6 +297,9 @@ foreach (var pair in pairs)
 ```
 
 ## Release Notes
+* Version 1.2.0 - 21 Sep 2020
+    * CryptoExchange Version Updated to 3.0.14
+
 * Version 1.0.5 - 14 Jun 2020
     * Added Websocket Endpoints
     * Added Api Authendication
