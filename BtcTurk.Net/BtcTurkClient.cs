@@ -704,7 +704,7 @@ namespace BtcTurk.Net
 
         protected Uri GetUrl(string endpoint, string version = null)
         {
-            return string.IsNullOrEmpty(version) ? new Uri($"{BaseAddress}/{endpoint}") : new Uri($"{BaseAddress}/v{version}/{endpoint}");
+            return string.IsNullOrEmpty(version) ? new Uri($"{BaseAddress.TrimEnd('/')}/{endpoint}") : new Uri($"{BaseAddress.TrimEnd('/')}/v{version}/{endpoint}");
         }
 
         private void Configure(BtcTurkClientOptions options)
