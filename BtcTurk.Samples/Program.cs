@@ -63,6 +63,7 @@ namespace BtcTurk.Samples
                 });
                 subs.Add(subscription.Data);
             }
+            Console.ReadLine();
             /**/
 
             // All Tickers
