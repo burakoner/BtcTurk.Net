@@ -210,7 +210,7 @@ namespace BtcTurk.Net
         /// <summary>
         /// Create a new instance of the BtcTurkClient with the provided options
         /// </summary>
-        public BtcTurkClient(BtcTurkClientOptions options) : base(options, options.ApiCredentials == null ? null : new BtcTurkAuthenticationProvider(options.ApiCredentials, ArrayParametersSerialization.MultipleValues))
+        public BtcTurkClient(BtcTurkClientOptions options) : base("BtcTurk", options, options.ApiCredentials == null ? null : new BtcTurkAuthenticationProvider(options.ApiCredentials, ArrayParametersSerialization.MultipleValues))
         {
             arraySerialization = ArrayParametersSerialization.MultipleValues;
             Configure(options);

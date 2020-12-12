@@ -37,7 +37,7 @@ namespace BtcTurk.Net
         /// Create a new instance of BtcTurkSocketClient using provided options
         /// </summary>
         /// <param name="options">The options to use for this client</param>
-        public BtcTurkSocketClient(BtcTurkSocketClientOptions options) : base(options, options.ApiCredentials == null ? null : new BtcTurkAuthenticationProvider(options.ApiCredentials,  ArrayParametersSerialization.MultipleValues))
+        public BtcTurkSocketClient(BtcTurkSocketClientOptions options) : base("BtcTurk", options, options.ApiCredentials == null ? null : new BtcTurkAuthenticationProvider(options.ApiCredentials,  ArrayParametersSerialization.MultipleValues))
         {
             Configure(options);
         }

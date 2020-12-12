@@ -297,6 +297,10 @@ foreach (var pair in pairs)
 ```
 
 ## Release Notes
+* Version 1.2.4 - 12 Dec 2020
+    * CryptoExchange Version Updated to 3.3.0
+    * Added V1 V2 V3 Swagger documents and Web Socket manual
+
 * Version 1.2.3 - 08 Nov 2020
     * Fixed duplicate slashes on BaseAddress caused by CryptoExchange
 
