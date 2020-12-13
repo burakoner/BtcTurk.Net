@@ -28,17 +28,17 @@ My CryptoExchange.Net implementations:
 JKorf CryptoExchange.Net implementations:
 <table>
 <tr>
-<td><a href="https://github.com/JKorf/Binance.Net"><img src="https://raw.githubusercontent.com/JKorf/Binance.Net/master/Binance.Net/Icon/icon.png?raw=true"></a>
+<td><a href="https://github.com/JKorf/Binance.Net"><img src="https://github.com/JKorf/Binance.Net/blob/master/Binance.Net/Icon/icon.png?raw=true"></a>
 <br />
 <a href="https://github.com/JKorf/Binance.Net">Binance</a>
-</td>
-<td><a href="https://github.com/JKorf/Bittrex.Net"><img src="https://github.com/JKorf/Bittrex.Net/blob/master/Bittrex.Net/Icon/icon.png?raw=true"></a>
-<br />
-<a href="https://github.com/JKorf/Bittrex.Net">Bittrex</a>
 </td>
 <td><a href="https://github.com/JKorf/Bitfinex.Net"><img src="https://github.com/JKorf/Bitfinex.Net/blob/master/Bitfinex.Net/Icon/icon.png?raw=true"></a>
 <br />
 <a href="https://github.com/JKorf/Bitfinex.Net">Bitfinex</a>
+</td>
+<td><a href="https://github.com/JKorf/Bittrex.Net"><img src="https://github.com/JKorf/Bittrex.Net/blob/master/Bittrex.Net/Icon/icon.png?raw=true"></a>
+<br />
+<a href="https://github.com/JKorf/Bittrex.Net">Bittrex</a>
 </td>
 <td><a href="https://github.com/JKorf/CoinEx.Net"><img src="https://github.com/JKorf/CoinEx.Net/blob/master/CoinEx.Net/Icon/icon.png?raw=true"></a>
 <br />
@@ -48,13 +48,13 @@ JKorf CryptoExchange.Net implementations:
 <br />
 <a href="https://github.com/JKorf/Huobi.Net">Huobi</a>
 </td>
-<td><a href="https://github.com/JKorf/Kucoin.Net"><img src="https://github.com/JKorf/Kucoin.Net/blob/master/Kucoin.Net/Icon/icon.png?raw=true"></a>
-<br />
-<a href="https://github.com/JKorf/Kucoin.Net">Kucoin</a>
-</td>
 <td><a href="https://github.com/JKorf/Kraken.Net"><img src="https://github.com/JKorf/Kraken.Net/blob/master/Kraken.Net/Icon/icon.png?raw=true"></a>
 <br />
 <a href="https://github.com/JKorf/Kraken.Net">Kraken</a>
+</td>
+<td><a href="https://github.com/JKorf/Kucoin.Net"><img src="https://github.com/JKorf/Kucoin.Net/blob/master/Kucoin.Net/Icon/icon.png?raw=true"></a>
+<br />
+<a href="https://github.com/JKorf/Kucoin.Net">Kucoin</a>
 </td>
 </tr>
 </table>
@@ -62,13 +62,25 @@ JKorf CryptoExchange.Net implementations:
 Implementations from third parties:
 <table>
 <tr>
-<td><a href="https://github.com/Zaliro/Switcheo.Net"><img src="https://github.com/Zaliro/Switcheo.Net/blob/master/Resources/switcheo-coin.png?raw=true"></a>
+<td><a href="https://github.com/ridicoulous/Bitmex.Net"><img src="https://github.com/ridicoulous/Bitmex.Net/blob/master/Bitmex.Net/Icon/icon.png"></a>
 <br />
-<a href="https://github.com/Zaliro/Switcheo.Net">Switcheo</a>
+<a href="https://github.com/ridicoulous/Bitmex.Net">Bitmex</a>
+</td>
+<td><a href="https://github.com/intelligences/HitBTC.Net"><img src="https://github.com/intelligences/HitBTC.Net/blob/master/src/HitBTC.Net/Icon/icon.png?raw=true"></a>
+<br />
+<a href="https://github.com/intelligences/HitBTC.Net">HitBTC</a>
 </td>
 <td><a href="https://github.com/ridicoulous/LiquidQuoine.Net"><img src="https://github.com/ridicoulous/LiquidQuoine.Net/blob/master/Resources/icon.png?raw=true"></a>
 <br />
 <a href="https://github.com/ridicoulous/LiquidQuoine.Net">Liquid</a>
+</td>
+<td><a href="https://github.com/EricGarnier/LiveCoin.Net"><img src="https://github.com/EricGarnier/LiveCoin.Net/blob/master/LiveCoin.Net/Icon/icon.png?raw=true"></a>
+<br />
+<a href="https://github.com/EricGarnier/LiveCoin.Net">LiveCoin</a>
+</td>
+<td><a href="https://github.com/Zaliro/Switcheo.Net"><img src="https://github.com/Zaliro/Switcheo.Net/blob/master/Resources/switcheo-coin.png?raw=true"></a>
+<br />
+<a href="https://github.com/Zaliro/Switcheo.Net">Switcheo</a>
 </td>
 </tr>
 </table>
@@ -298,17 +310,17 @@ foreach (var pair in pairs)
 
 ## Release Notes
 * Version 1.2.4 - 12 Dec 2020
-    * CryptoExchange Version Updated to 3.3.0
-    * Added V1 V2 V3 Swagger documents and Web Socket manual
+    * CryptoExchange version updated to 3.3.0
+    * Added v1 v2 v3 Swagger documents and Web Socket manual
 
 * Version 1.2.3 - 08 Nov 2020
     * Fixed duplicate slashes on BaseAddress caused by CryptoExchange
 
 * Version 1.2.1 - 08 Nov 2020
-    * CryptoExchange Version Updated to 3.1.0
+    * CryptoExchange version updated to 3.1.0
 
 * Version 1.2.0 - 21 Sep 2020
-    * CryptoExchange Version Updated to 3.0.14
+    * CryptoExchange version updated to 3.0.14
 
 * Version 1.0.5 - 14 Jun 2020
     * Added Websocket Endpoints
