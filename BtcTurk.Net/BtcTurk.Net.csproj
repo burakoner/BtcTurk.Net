@@ -8,39 +8,50 @@
   <PropertyGroup>
     <PackageId>BtcTurk.Net</PackageId>
     <Authors>Burak Öner</Authors>
-    <PackageVersion>1.2.4</PackageVersion>
+    <PackageVersion>1.2.5</PackageVersion>
     <Description>BtcTurk.Net is a .Net wrapper for the BtcTurk API. It includes all features the API provides, REST API and Websocket, using clear and readable objects including but not limited to Reading market info, Placing and managing orders and Reading balances and funds</Description>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageTags>BtcTurk BtcTurk.Net C# .Net CryptoCurrency Exchange API wrapper</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <NeutralLanguage>en</NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageReleaseNotes>Version 1.2.4 - 12 Dec 2020
-CryptoExchange Version Updated to 3.3.0
-Added V1 V2 V3 Swagger documents and Web Socket manual
+    <PackageReleaseNotes>
+Version 1.2.5 - 23 Dec 2020
+- CryptoExchange Version Updated to 3.4.0
+
+Version 1.2.4 - 12 Dec 2020
+- CryptoExchange Version Updated to 3.3.0
+- Added V1 V2 V3 Swagger documents and Web Socket manual
 
 Version 1.2.3 - 08 Nov 2020
-Fixed duplicate slashes on BaseAddress caused by CryptoExchange
+- Fixed duplicate slashes on BaseAddress caused by CryptoExchange
 
 Version 1.2.1 - 08 Nov 2020
-CryptoExchange Version Updated to 3.1.0
+- CryptoExchange Version Updated to 3.1.0
 
 Version 1.2.0 - 21 Sep 2020
-CryptoExchange Version Updated to 3.0.14
+- CryptoExchange Version Updated to 3.0.14
 
-1.0.5 - Fixed Authentication Provider 
-         - Added websocket endpoints
+Version 1.0.5 - 14 Jun 2020
+- Fixed Authentication Provider 
+- Added websocket endpoints
 
-1.0.1 - CryptoExchange Fixes
+Version 1.0.1
+- CryptoExchange Fixes
 
-1.0.0 - First Release</PackageReleaseNotes>
+Version 1.0.0 - 01 Feb 2020
+- First Release
+
+* Version 1.0.0
+    * First Release
+    </PackageReleaseNotes>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl />
     <PackageProjectUrl>https://github.com/burakoner/BtcTurk.Net</PackageProjectUrl>
     <RepositoryUrl>https://github.com/burakoner/BtcTurk.Net</RepositoryUrl>
-    <Version>1.2.4</Version>
-    <AssemblyVersion>1.2.4.0</AssemblyVersion>
-    <FileVersion>1.2.4.0</FileVersion>
+    <Version>1.2.5</Version>
+    <AssemblyVersion>1.2.5.0</AssemblyVersion>
+    <FileVersion>1.2.5.0</FileVersion>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Icon\" />
@@ -53,7 +64,7 @@ CryptoExchange Version Updated to 3.0.14
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CryptoExchange.Net" Version="3.3.0" />
+    <PackageReference Include="CryptoExchange.Net" Version="3.4.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
   </ItemGroup>
 

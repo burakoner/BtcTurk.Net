@@ -22,6 +22,10 @@ My CryptoExchange.Net implementations:
 <br />
 <a href="https://github.com/burakoner/BtcTurk.Net">BtcTurk</a>
 </td>
+<td><a href="https://github.com/burakoner/Thodex.Net"><img src="https://github.com/burakoner/Thodex.Net/blob/main/Thodex.Net/Icon/icon.png?raw=true"></a>
+<br />
+<a href="https://github.com/burakoner/Thodex.Net">Thodex</a>
+</td>
 </tr>
 </table>
 
@@ -95,7 +99,7 @@ Donations are greatly appreciated and a motivation to keep improving.
 ![Nuget version](https://img.shields.io/nuget/v/BtcTurk.Net.svg)  ![Nuget downloads](https://img.shields.io/nuget/dt/BtcTurk.Net.svg)
 Available on [Nuget](https://www.nuget.org/packages/BtcTurk.Net).
 ```
-pm> Install-Package BtcTurk.Net
+PM> Install-Package BtcTurk.Net
 ```
 To get started with BtcTurk.Net first you will need to get the library itself. The easiest way to do this is to install the package into your project using  [NuGet](https://www.nuget.org/packages/BtcTurk.Net). Using Visual Studio this can be done in two ways.
 
@@ -309,6 +313,9 @@ foreach (var pair in pairs)
 ```
 
 ## Release Notes
+* Version 1.2.4 - 23 Dec 2020
+    * CryptoExchange version updated to 3.4.0
+
 * Version 1.2.4 - 12 Dec 2020
     * CryptoExchange version updated to 3.3.0
     * Added v1 v2 v3 Swagger documents and Web Socket manual
