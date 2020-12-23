@@ -313,7 +313,7 @@ foreach (var pair in pairs)
 ```
 
 ## Release Notes
-* Version 1.2.4 - 23 Dec 2020
+* Version 1.2.5 - 23 Dec 2020
     * CryptoExchange version updated to 3.4.0
 
 * Version 1.2.4 - 12 Dec 2020
