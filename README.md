@@ -18,6 +18,10 @@ My CryptoExchange.Net implementations:
 <br />
 <a href="https://github.com/burakoner/Chiliz.Net">Chiliz</a>
 </td>
+<td><a href="https://github.com/burakoner/BitMax.Net"><img src="https://github.com/burakoner/BitMax.Net/blob/master/BitMax.Net/Icon/icon.png?raw=true"></a>
+<br />
+<a href="https://github.com/burakoner/BitMax.Net">BitMax</a>
+</td>
 <td><a href="https://github.com/burakoner/BtcTurk.Net"><img src="https://github.com/burakoner/BtcTurk.Net/blob/master/BtcTurk.Net/Icon/icon.png?raw=true"></a>
 <br />
 <a href="https://github.com/burakoner/BtcTurk.Net">BtcTurk</a>
@@ -26,9 +30,9 @@ My CryptoExchange.Net implementations:
 <br />
 <a href="https://github.com/burakoner/Thodex.Net">Thodex</a>
 </td>
-<td><a href="https://github.com/burakoner/BitMax.Net"><img src="https://github.com/burakoner/BitMax.Net/blob/master/BitMax.Net/Icon/icon.png?raw=true"></a>
+<td><a href="https://github.com/burakoner/Coinzo.Net"><img src="https://github.com/burakoner/Coinzo.Net/blob/master/Coinzo.Net/Icon/icon.png?raw=true"></a>
 <br />
-<a href="https://github.com/burakoner/BitMax.Net">BitMax</a>
+<a href="https://github.com/burakoner/Coinzo.Net">Coinzo</a>
 </td>
 </tr>
 </table>
@@ -317,6 +321,9 @@ foreach (var pair in pairs)
 ```
 
 ## Release Notes
+* Version 1.2.6 - 02 Jan 2021
+    * Fixed minor bugs
+
 * Version 1.2.5 - 23 Dec 2020
     * CryptoExchange version updated to 3.4.0
 
