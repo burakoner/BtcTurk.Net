@@ -325,6 +325,9 @@ foreach (var pair in pairs)
 ```
 
 ## Release Notes
+* Version 1.2.8 - 12 Jan 2021
+    * Updated CryptoExchange.Net to 3.5.0
+
 * Version 1.2.6 - 02 Jan 2021
     * Fixed minor bugs
 
