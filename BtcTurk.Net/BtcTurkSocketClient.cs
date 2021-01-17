@@ -21,8 +21,8 @@ namespace BtcTurk.Net
     public class BtcTurkSocketClient : SocketClient, IBtcTurkSocketClient
     {
         #region Fields
-        private static BtcTurkSocketClientOptions defaultOptions = new BtcTurkSocketClientOptions();
-        private static BtcTurkSocketClientOptions DefaultOptions => defaultOptions.Copy();
+        protected static BtcTurkSocketClientOptions defaultOptions = new BtcTurkSocketClientOptions();
+        protected static BtcTurkSocketClientOptions DefaultOptions => defaultOptions.Copy();
         #endregion
 
         #region Ctor
@@ -37,14 +37,14 @@ namespace BtcTurk.Net
         /// Create a new instance of BtcTurkSocketClient using provided options
         /// </summary>
         /// <param name="options">The options to use for this client</param>
-        public BtcTurkSocketClient(BtcTurkSocketClientOptions options) : base("BtcTurk", options, options.ApiCredentials == null ? null : new BtcTurkAuthenticationProvider(options.ApiCredentials,  ArrayParametersSerialization.MultipleValues))
+        public BtcTurkSocketClient(BtcTurkSocketClientOptions options) : base("BtcTurk", options, options.ApiCredentials == null ? null : new BtcTurkAuthenticationProvider(options.ApiCredentials, ArrayParametersSerialization.MultipleValues))
         {
             Configure(options);
         }
         #endregion
 
         #region General Methods
-        private void Configure(BtcTurkSocketClientOptions options)
+        protected virtual void Configure(BtcTurkSocketClientOptions options)
         {
         }
 
@@ -59,32 +59,32 @@ namespace BtcTurk.Net
         #endregion
 
         #region Subscriptions
-        public CallResult<UpdateSubscription> SubscribeToTicker(string symbol, Action<BtcTurkStreamTickerSingle> onData) => SubscribeToTickerAsync(symbol, onData).Result;
-        public async Task<CallResult<UpdateSubscription>> SubscribeToTickerAsync(string symbol, Action<BtcTurkStreamTickerSingle> onData)
+        public virtual CallResult<UpdateSubscription> SubscribeToTicker(string symbol, Action<BtcTurkStreamTickerSingle> onData) => SubscribeToTickerAsync(symbol, onData).Result;
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToTickerAsync(string symbol, Action<BtcTurkStreamTickerSingle> onData)
         {
             var request = new BtcTurkSocketRequest(151, "ticker", symbol, true);
             var internalHandler = new Action<BtcTurkSocketResponse>(data => onData(JsonConvert.DeserializeObject<BtcTurkStreamTickerSingle>(data.Data)));
             return await Subscribe(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
         }
 
-        public CallResult<UpdateSubscription> SubscribeToTickers(Action<BtcTurkStreamTickerAll> onData) => SubscribeToTickersAsync(onData).Result;
-        public async Task<CallResult<UpdateSubscription>> SubscribeToTickersAsync(Action<BtcTurkStreamTickerAll> onData)
+        public virtual CallResult<UpdateSubscription> SubscribeToTickers(Action<BtcTurkStreamTickerAll> onData) => SubscribeToTickersAsync(onData).Result;
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToTickersAsync(Action<BtcTurkStreamTickerAll> onData)
         {
             var request = new BtcTurkSocketRequest(151, "ticker", "all", true);
             var internalHandler = new Action<BtcTurkSocketResponse>(data => onData(JsonConvert.DeserializeObject<BtcTurkStreamTickerAll>(data.Data)));
             return await Subscribe(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
         }
 
-        public CallResult<UpdateSubscription> SubscribeToKlines(string symbol, BtcTurkPeriod period, Action<BtcTurkStreamKline> onData) => SubscribeToKlinesAsync(symbol, period, onData).Result;
-        public async Task<CallResult<UpdateSubscription>> SubscribeToKlinesAsync(string symbol, BtcTurkPeriod period, Action<BtcTurkStreamKline> onData)
+        public virtual CallResult<UpdateSubscription> SubscribeToKlines(string symbol, BtcTurkPeriod period, Action<BtcTurkStreamKline> onData) => SubscribeToKlinesAsync(symbol, period, onData).Result;
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToKlinesAsync(string symbol, BtcTurkPeriod period, Action<BtcTurkStreamKline> onData)
         {
-            var request = new BtcTurkSocketRequest(151,"tradeview", $"{symbol}_{JsonConvert.SerializeObject(period, new PeriodEnumConverter(false))}", true);
-            var internalHandler = new Action<BtcTurkSocketResponse>(data => onData(JsonConvert.DeserializeObject< BtcTurkStreamKline >(data.Data)));
+            var request = new BtcTurkSocketRequest(151, "tradeview", $"{symbol}_{JsonConvert.SerializeObject(period, new PeriodEnumConverter(false))}", true);
+            var internalHandler = new Action<BtcTurkSocketResponse>(data => onData(JsonConvert.DeserializeObject<BtcTurkStreamKline>(data.Data)));
             return await Subscribe(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
         }
 
-        public CallResult<UpdateSubscription> SubscribeToTrades(string symbol, Action<BtcTurkStreamTradeList> onListData, Action<BtcTurkStreamTradeSingle> onRowData) => SubscribeToTradesAsync(symbol, onListData, onRowData).Result;
-        public async Task<CallResult<UpdateSubscription>> SubscribeToTradesAsync(string symbol, Action<BtcTurkStreamTradeList> onListData, Action<BtcTurkStreamTradeSingle> onRowData)
+        public virtual CallResult<UpdateSubscription> SubscribeToTrades(string symbol, Action<BtcTurkStreamTradeList> onListData, Action<BtcTurkStreamTradeSingle> onRowData) => SubscribeToTradesAsync(symbol, onListData, onRowData).Result;
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToTradesAsync(string symbol, Action<BtcTurkStreamTradeList> onListData, Action<BtcTurkStreamTradeSingle> onRowData)
         {
             var request = new BtcTurkSocketRequest(151, "trade", symbol, true);
             var internalHandler = new Action<BtcTurkSocketResponse>(data =>
@@ -96,16 +96,16 @@ namespace BtcTurk.Net
             return await Subscribe(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
         }
 
-        public CallResult<UpdateSubscription> SubscribeToOrderBookFull(string symbol, Action<BtcTurkStreamOrderBookFull> onData) => SubscribeToOrderBookFullAsync(symbol, onData).Result;
-        public async Task<CallResult<UpdateSubscription>> SubscribeToOrderBookFullAsync(string symbol, Action<BtcTurkStreamOrderBookFull> onData)
+        public virtual CallResult<UpdateSubscription> SubscribeToOrderBookFull(string symbol, Action<BtcTurkStreamOrderBookFull> onData) => SubscribeToOrderBookFullAsync(symbol, onData).Result;
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToOrderBookFullAsync(string symbol, Action<BtcTurkStreamOrderBookFull> onData)
         {
             var request = new BtcTurkSocketRequest(151, "orderbook", symbol, true);
             var internalHandler = new Action<BtcTurkSocketResponse>(data => onData(JsonConvert.DeserializeObject<BtcTurkStreamOrderBookFull>(data.Data)));
             return await Subscribe(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
         }
 
-        public CallResult<UpdateSubscription> SubscribeToOrderBookDiff(string symbol, Action<BtcTurkStreamOrderBookFull> onFullData, Action<BtcTurkStreamOrderBookDifference> onDiffData) => SubscribeToOrderBookDiffAsync(symbol, onFullData, onDiffData).Result;
-        public async Task<CallResult<UpdateSubscription>> SubscribeToOrderBookDiffAsync(string symbol, Action<BtcTurkStreamOrderBookFull> onFullData, Action<BtcTurkStreamOrderBookDifference> onDiffData)
+        public virtual CallResult<UpdateSubscription> SubscribeToOrderBookDiff(string symbol, Action<BtcTurkStreamOrderBookFull> onFullData, Action<BtcTurkStreamOrderBookDifference> onDiffData) => SubscribeToOrderBookDiffAsync(symbol, onFullData, onDiffData).Result;
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToOrderBookDiffAsync(string symbol, Action<BtcTurkStreamOrderBookFull> onFullData, Action<BtcTurkStreamOrderBookDifference> onDiffData)
         {
             var request = new BtcTurkSocketRequest(151, "obdiff", symbol, true);
             var internalHandler = new Action<BtcTurkSocketResponse>(data =>
@@ -121,6 +121,10 @@ namespace BtcTurk.Net
 
         #region Private Methods
         protected override SocketConnection GetWebsocket(string address, bool authenticated)
+        {
+            return this.BtcTurkGetWebsocket(address, authenticated);
+        }
+        protected virtual SocketConnection BtcTurkGetWebsocket(string address, bool authenticated)
         {
             var socketResult = sockets.Where(s => s.Value.Socket.Url == address && (s.Value.Authenticated == authenticated || !authenticated) && s.Value.Connected).OrderBy(s => s.Value.HandlerCount).FirstOrDefault();
             var result = socketResult.Equals(default(KeyValuePair<int, SocketConnection>)) ? null : socketResult.Value;
@@ -143,15 +147,12 @@ namespace BtcTurk.Net
 
             return socketWrapper;
         }
-        
-        /*
-        private void IncomingMessage(string data)
-        {
-            System.Diagnostics.Debug.WriteLine( "Message received: " +data);
-        }
-        */
 
         protected override bool HandleQueryResponse<T>(SocketConnection s, object request, JToken data, out CallResult<T> callResult)
+        {
+            return this.BtcTurkHandleQueryResponse<T>(s, request, data, out callResult);
+        }
+        protected virtual bool BtcTurkHandleQueryResponse<T>(SocketConnection s, object request, JToken data, out CallResult<T> callResult)
         {
             // out params
             callResult = new CallResult<T>(default, null);
@@ -174,6 +175,10 @@ namespace BtcTurk.Net
         }
 
         protected override bool HandleSubscriptionResponse(SocketConnection s, SocketSubscription subscription, object request, JToken message, out CallResult<object> callResult)
+        {
+            return this.BtcTurkHandleSubscriptionResponse(s, subscription, request, message, out callResult);
+        }
+        protected virtual bool BtcTurkHandleSubscriptionResponse(SocketConnection s, SocketSubscription subscription, object request, JToken message, out CallResult<object> callResult)
         {
             // out params
             callResult = new CallResult<object>(null, null);
@@ -236,6 +241,10 @@ namespace BtcTurk.Net
         }
 
         protected override bool MessageMatchesHandler(JToken message, object request)
+        {
+            return this.BtcTurkMessageMatchesHandler(message, request);
+        }
+        protected virtual bool BtcTurkMessageMatchesHandler(JToken message, object request)
         {
             try
             {
@@ -341,6 +350,10 @@ namespace BtcTurk.Net
 
         protected override bool MessageMatchesHandler(JToken message, string identifier)
         {
+            return this.BtcTurkMessageMatchesHandler(message, identifier);
+        }
+        protected virtual bool BtcTurkMessageMatchesHandler(JToken message, string identifier)
+        {
             if (message.Type != JTokenType.Object)
                 return false;
 
@@ -348,6 +361,10 @@ namespace BtcTurk.Net
         }
 
         protected override async Task<CallResult<bool>> AuthenticateSocket(SocketConnection s)
+        {
+            return await this.BtcTurkAuthenticateSocket(s);
+        }
+        protected virtual async Task<CallResult<bool>> BtcTurkAuthenticateSocket(SocketConnection s)
         {
             if (authProvider == null)
                 return new CallResult<bool>(false, new NoApiCredentialsError());
@@ -394,6 +411,10 @@ namespace BtcTurk.Net
         }
 
         protected override async Task<bool> Unsubscribe(SocketConnection connection, SocketSubscription s)
+        {
+            return await this.BtcTurkUnsubscribe(connection, s);
+        }
+        protected virtual async Task<bool> BtcTurkUnsubscribe(SocketConnection connection, SocketSubscription s)
         {
             // string topic = "";
             object unsub = null;

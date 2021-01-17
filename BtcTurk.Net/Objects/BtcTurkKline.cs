@@ -7,6 +7,7 @@ namespace BtcTurk.Net.Objects
 {
     public class BtcTurkKline
     {
+        private long _openTime;
         public long OpenTime
         {
             get { return _openTime; }
@@ -38,6 +39,7 @@ namespace BtcTurk.Net.Objects
         }
 
         /*
+        private long _closeTime;
         public long CloseTime
         {
             get { return _closeTime; }
@@ -51,7 +53,5 @@ namespace BtcTurk.Net.Objects
         }
         */
 
-        private long _openTime;
-        // private long _closeTime;
     }
 }

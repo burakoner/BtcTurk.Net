@@ -6,15 +6,15 @@ using System.Text;
 
 namespace BtcTurk.Net.Objects
 {
-    internal class BtcTurkApiResponse<T>
+    public class BtcTurkApiResponse<T>
     {
         [JsonOptionalProperty, JsonProperty("success")]
-        internal bool Success { get; set; }
+        public bool Success { get; set; }
         
         [JsonOptionalProperty, JsonProperty("message")]
-        internal string ErrorMessage { get; set; } = "";
+        public string ErrorMessage { get; set; } = "";
         [JsonOptionalProperty, JsonProperty("code")]
-        internal int ErrorCode { get; set; }
+        public int ErrorCode { get; set; }
 
         [JsonOptionalProperty, JsonProperty("data")]
         public T Data { get; set; }

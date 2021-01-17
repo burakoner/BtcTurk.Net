@@ -23,179 +23,179 @@ namespace BtcTurk.Net
     public class BtcTurkClient : RestClient, IBtcTurkClient
     {
         #region fields
-        private static BtcTurkClientOptions defaultOptions = new BtcTurkClientOptions();
-        private static BtcTurkClientOptions DefaultOptions => defaultOptions.Copy();
+        protected static BtcTurkClientOptions defaultOptions = new BtcTurkClientOptions();
+        protected static BtcTurkClientOptions DefaultOptions => defaultOptions.Copy();
 
         // Api Version
-        private const string V1 = "1";
-        private const string V2 = "2";
-        private const string NoVersion = "";
-        private const string PublicVersion = "2";
-        private const string SignedVersion = "2";
+        protected const string V1 = "1";
+        protected const string V2 = "2";
+        protected const string NoVersion = "";
+        protected const string PublicVersion = "2";
+        protected const string SignedVersion = "2";
 
         // Methods
-        private const string GetMethod = "GET";
-        private const string PostMethod = "POST";
-        private const string DeleteMethod = "DELETE";
-        private const string PutMethod = "PUT";
+        protected const string GetMethod = "GET";
+        protected const string PostMethod = "POST";
+        protected const string DeleteMethod = "DELETE";
+        protected const string PutMethod = "PUT";
 
         // V1 Endpoints
-        private const string V1_Balances_Endpoint = "users/balances";
-        private const string V1_Order_Endpoint = "order";
-        private const string V1_AllOrders_Endpoint = "allOrders";
-        private const string V1_OpenOrders_Endpoint = "openOrders";
-        private const string V1_Trades_Endpoint = "trades";
-        private const string V1_TransactionsTrade_Endpoint = "users/transactions/trade";
-        private const string V1_TransactionsTradeByPair_Endpoint = "users/transactions/trade/{pairSymbol}";
-        private const string V1_TransactionsCrypto_Endpoint = "users/transactions/crypto";
-        private const string V1_TransactionsFiat_Endpoint = "users/transactions/fiat";
+        protected const string V1_Balances_Endpoint = "users/balances";
+        protected const string V1_Order_Endpoint = "order";
+        protected const string V1_AllOrders_Endpoint = "allOrders";
+        protected const string V1_OpenOrders_Endpoint = "openOrders";
+        protected const string V1_Trades_Endpoint = "trades";
+        protected const string V1_TransactionsTrade_Endpoint = "users/transactions/trade";
+        protected const string V1_TransactionsTradeByPair_Endpoint = "users/transactions/trade/{pairSymbol}";
+        protected const string V1_TransactionsCrypto_Endpoint = "users/transactions/crypto";
+        protected const string V1_TransactionsFiat_Endpoint = "users/transactions/fiat";
 
         // Account
-        private const string Account_OtpQrCode_Endpoint = "account/otp-qr-code";
-        private const string Account_OtpGetHash_Endpoint = "account/otp-get-hash";
-        private const string Account_OtpSms_Endpoint = "account/otp-sms";
-        private const string Account_UsersInfo_Endpoint = "users/info";
-        private const string Account_Info_Endpoint = "account/info";
-        private const string Account_ChangePassword_Endpoint = "account/change-password";
-        private const string Account_UsersLog_Endpoint = "users/logs";
-        private const string Account_AccountLogs_Endpoint = "account/logs";
-        private const string Account_AccountProfile_Endpoint = "account/profile";
-        private const string Account_UsersCommissions_Endpoint = "users/commissions";
-        private const string Account_Commissions_Endpoint = "account/commissions";
-        private const string Account_UsersLimits_Endpoint = "users/limits";
-        private const string Account_Limits_Endpoint = "account/limits";
-        private const string Account_SmsCode_Endpoint = "account/sms-code";
-        private const string Account_Notification_Endpoint = "account/notification";
-        private const string Account_UsersBalances_Endpoint = "users/balances";
-        private const string Account_Balances_Endpoint = "account/balances";
-        private const string Account_Timeout_Endpoint = "account/timeout";
-        private const string Account_History_Endpoint = "account/history";
-        private const string Account_AdvancedOrderHistory_Endpoint = "account/advanced-order-history";
+        protected const string Account_OtpQrCode_Endpoint = "account/otp-qr-code";
+        protected const string Account_OtpGetHash_Endpoint = "account/otp-get-hash";
+        protected const string Account_OtpSms_Endpoint = "account/otp-sms";
+        protected const string Account_UsersInfo_Endpoint = "users/info";
+        protected const string Account_Info_Endpoint = "account/info";
+        protected const string Account_ChangePassword_Endpoint = "account/change-password";
+        protected const string Account_UsersLog_Endpoint = "users/logs";
+        protected const string Account_AccountLogs_Endpoint = "account/logs";
+        protected const string Account_AccountProfile_Endpoint = "account/profile";
+        protected const string Account_UsersCommissions_Endpoint = "users/commissions";
+        protected const string Account_Commissions_Endpoint = "account/commissions";
+        protected const string Account_UsersLimits_Endpoint = "users/limits";
+        protected const string Account_Limits_Endpoint = "account/limits";
+        protected const string Account_SmsCode_Endpoint = "account/sms-code";
+        protected const string Account_Notification_Endpoint = "account/notification";
+        protected const string Account_UsersBalances_Endpoint = "users/balances";
+        protected const string Account_Balances_Endpoint = "account/balances";
+        protected const string Account_Timeout_Endpoint = "account/timeout";
+        protected const string Account_History_Endpoint = "account/history";
+        protected const string Account_AdvancedOrderHistory_Endpoint = "account/advanced-order-history";
 
         // AccountAuth
-        private const string AccountAuth_Login_Endpoint = "auth/login";
-        private const string AccountAuth_Otp_Endpoint = "auth/otp";
-        private const string AccountAuth_OtpQrCode_Endpoint = "auth/otp-qr-code";
-        private const string AccountAuth_ResetPassword_Endpoint = "auth/reset-password";
+        protected const string AccountAuth_Login_Endpoint = "auth/login";
+        protected const string AccountAuth_Otp_Endpoint = "auth/otp";
+        protected const string AccountAuth_OtpQrCode_Endpoint = "auth/otp-qr-code";
+        protected const string AccountAuth_ResetPassword_Endpoint = "auth/reset-password";
 
         // AccountBank
-        private const string AccountBank_AccountBanks_Endpoint = "account/banks";
-        private const string AccountBank_AccountBanksId_Endpoint = "account/banks/{id}";
+        protected const string AccountBank_AccountBanks_Endpoint = "account/banks";
+        protected const string AccountBank_AccountBanksId_Endpoint = "account/banks/{id}";
 
         // AccountTransaction
-        private const string AccountTransaction_UsersTransactionsTrade_Endpoint = "users/transactions/trade";
-        private const string AccountTransaction_UsersTransactionsTradePairSymbol_Endpoint = "users/transactions/trade/{pairSymbol}";
-        private const string AccountTransaction_AccountTransactionsTrade_Endpoint = "account/transactions/trade";
-        private const string AccountTransaction_AccountTransactionsTradePairSymbol_Endpoint = "account/transactions/trade/{pairSymbol}";
-        private const string AccountTransaction_UsersTransactionsCrypto_Endpoint = "users/transactions/crypto";
-        private const string AccountTransaction_AccountTransactionsCrypto_Endpoint = "account/transactions/crypto";
-        private const string AccountTransaction_UsersTransactionsFiat_Endpoint = "users/transactions/fiat";
-        private const string AccountTransaction_AccountTransactionsFiat_Endpoint = "account/transactions/fiat";
-        private const string AccountTransaction_AccountTransactionsOrderHistory_Endpoint = "account/transactions/orderHistory";
-        private const string AccountTransaction_AccountTransactionsOrderTrades_Endpoint = "account/transactions/orderTrades";
+        protected const string AccountTransaction_UsersTransactionsTrade_Endpoint = "users/transactions/trade";
+        protected const string AccountTransaction_UsersTransactionsTradePairSymbol_Endpoint = "users/transactions/trade/{pairSymbol}";
+        protected const string AccountTransaction_AccountTransactionsTrade_Endpoint = "account/transactions/trade";
+        protected const string AccountTransaction_AccountTransactionsTradePairSymbol_Endpoint = "account/transactions/trade/{pairSymbol}";
+        protected const string AccountTransaction_UsersTransactionsCrypto_Endpoint = "users/transactions/crypto";
+        protected const string AccountTransaction_AccountTransactionsCrypto_Endpoint = "account/transactions/crypto";
+        protected const string AccountTransaction_UsersTransactionsFiat_Endpoint = "users/transactions/fiat";
+        protected const string AccountTransaction_AccountTransactionsFiat_Endpoint = "account/transactions/fiat";
+        protected const string AccountTransaction_AccountTransactionsOrderHistory_Endpoint = "account/transactions/orderHistory";
+        protected const string AccountTransaction_AccountTransactionsOrderTrades_Endpoint = "account/transactions/orderTrades";
 
         // Alarm
-        private const string Alarm_Endpoint = "alarm";
-        private const string Alarm_IdCurrency_Endpoint = "alarm/{id}/{currency}";
+        protected const string Alarm_Endpoint = "alarm";
+        protected const string Alarm_IdCurrency_Endpoint = "alarm/{id}/{currency}";
 
         // ApiAccess
-        private const string ApiAccess_Endpoint = "api/access";
-        private const string ApiAccess_Id_Endpoint = "api/access/{id}";
+        protected const string ApiAccess_Endpoint = "api/access";
+        protected const string ApiAccess_Id_Endpoint = "api/access/{id}";
 
         // Bank
-        private const string Banks_Endpoint = "banks";
-        private const string Banks_Id_Endpoint = "banks/{id}";
+        protected const string Banks_Endpoint = "banks";
+        protected const string Banks_Id_Endpoint = "banks/{id}";
 
         // CryptoDeposit
-        private const string CryptoDeposit_CurrencySymbol_Endpoint = "deposits/crypto/{currencySymbol}";
-        private const string CryptoDeposit_PendingsCurrencySymbol_Endpoint = "deposits/crypto/pendings/{currencySymbol}";
+        protected const string CryptoDeposit_CurrencySymbol_Endpoint = "deposits/crypto/{currencySymbol}";
+        protected const string CryptoDeposit_PendingsCurrencySymbol_Endpoint = "deposits/crypto/pendings/{currencySymbol}";
 
         // CryptoWithdraw
-        private const string Withdrawals_CryptoPendingCurrencySymbol_Endpoint = "withdrawals/crypto/pending/{currencySymbol}";
-        private const string Withdrawals_Crypto_Endpoint = "withdrawals/crypto";
-        private const string Withdrawals_CryptoId_Endpoint = "withdrawals/crypto/{id}";
-        private const string Withdrawals_CryptoCurrencySymbol_Endpoint = "withdrawals/crypto/{currencySymbol}";
-        private const string Withdrawals_CryptValidationCode_Endpoint = "withdrawals/crypto/validation/{code}";
-        private const string Withdrawals_CryptoReceiverAddressesCurrencySymbol_Endpoint = "withdrawals/crypto/receiver-addresses/{currencySymbol}";
-        private const string Withdrawals_CryptoReceiverAddresses_Endpoint = "withdrawals/crypto/receiver-addresses";
-        private const string Withdrawals_CryptoAddressValidation_Endpoint = "withdrawals/crypto/address-validation";
-        private const string Withdrawals_CryptoReceiverAddressesId_Endpoint = "withdrawals/crypto/receiver-addresses/{id}";
+        protected const string Withdrawals_CryptoPendingCurrencySymbol_Endpoint = "withdrawals/crypto/pending/{currencySymbol}";
+        protected const string Withdrawals_Crypto_Endpoint = "withdrawals/crypto";
+        protected const string Withdrawals_CryptoId_Endpoint = "withdrawals/crypto/{id}";
+        protected const string Withdrawals_CryptoCurrencySymbol_Endpoint = "withdrawals/crypto/{currencySymbol}";
+        protected const string Withdrawals_CryptValidationCode_Endpoint = "withdrawals/crypto/validation/{code}";
+        protected const string Withdrawals_CryptoReceiverAddressesCurrencySymbol_Endpoint = "withdrawals/crypto/receiver-addresses/{currencySymbol}";
+        protected const string Withdrawals_CryptoReceiverAddresses_Endpoint = "withdrawals/crypto/receiver-addresses";
+        protected const string Withdrawals_CryptoAddressValidation_Endpoint = "withdrawals/crypto/address-validation";
+        protected const string Withdrawals_CryptoReceiverAddressesId_Endpoint = "withdrawals/crypto/receiver-addresses/{id}";
 
         // Device
-        private const string Device_Set_Endpoint = "device/set";
-        private const string Device_Update_Endpoint = "device/update";
+        protected const string Device_Set_Endpoint = "device/set";
+        protected const string Device_Update_Endpoint = "device/update";
 
         // Exchange
-        private const string Exchange_Commissions_Endpoint = "exchange/commissions";
+        protected const string Exchange_Commissions_Endpoint = "exchange/commissions";
 
         // FiatDeposit
-        private const string FiatDeposit_ServiceType_Endpoint = "deposits/fiat/{serviceType}";
-        private const string FiatDeposit_Bank_Endpoint = "deposits/fiat/bank";
-        private const string FiatDeposit_BankId_Endpoint = "deposits/fiat/bank/{id}";
-        private const string FiatDeposit_SendPapara_Endpoint = "deposits/fiat/send-papara";
-        private const string FiatDeposit_Papara_Endpoint = "deposits/fiat/papara";
-        private const string FiatDeposit_PaparaValidationReference_Endpoint = "deposits/fiat/papara/validation/{reference}";
+        protected const string FiatDeposit_ServiceType_Endpoint = "deposits/fiat/{serviceType}";
+        protected const string FiatDeposit_Bank_Endpoint = "deposits/fiat/bank";
+        protected const string FiatDeposit_BankId_Endpoint = "deposits/fiat/bank/{id}";
+        protected const string FiatDeposit_SendPapara_Endpoint = "deposits/fiat/send-papara";
+        protected const string FiatDeposit_Papara_Endpoint = "deposits/fiat/papara";
+        protected const string FiatDeposit_PaparaValidationReference_Endpoint = "deposits/fiat/papara/validation/{reference}";
 
         // FiatWithdrawal
-        private const string FiatWithdrawal_Bank_Endpoint = "withdrawals/fiat/bank";
-        private const string FiatWithdrawal_BankId_Endpoint = "withdrawals/fiat/bank/{id}";
-        private const string FiatWithdrawal_Papara_Endpoint = "withdrawals/fiat/papara";
-        private const string FiatWithdrawal_ConfirmId_Endpoint = "withdrawals/fiat/confirm/{id}";
+        protected const string FiatWithdrawal_Bank_Endpoint = "withdrawals/fiat/bank";
+        protected const string FiatWithdrawal_BankId_Endpoint = "withdrawals/fiat/bank/{id}";
+        protected const string FiatWithdrawal_Papara_Endpoint = "withdrawals/fiat/papara";
+        protected const string FiatWithdrawal_ConfirmId_Endpoint = "withdrawals/fiat/confirm/{id}";
 
         // Home
-        private const string Home_ResourcesLanguage_Endpoint = "resources/{language}.json";
+        protected const string Home_ResourcesLanguage_Endpoint = "resources/{language}.json";
 
         // KnowYourCustomer
-        private const string KnowYourCustomer_Endpoint = "account/kyc";
-        private const string KnowYourCustomer_FileId_Endpoint = "account/kyc/{fileId}";
+        protected const string KnowYourCustomer_Endpoint = "account/kyc";
+        protected const string KnowYourCustomer_FileId_Endpoint = "account/kyc/{fileId}";
 
         // Korder
-        private const string Korder_Endpoint = "korder";
+        protected const string Korder_Endpoint = "korder";
 
         // OHLC
-        private const string OhlcEndpoint = "ohlc";
-        private const string OhlcVolumesInBtcEndpoint = "ohlc/volumes/btc";
+        protected const string OhlcEndpoint = "ohlc";
+        protected const string OhlcVolumesInBtcEndpoint = "ohlc/volumes/btc";
 
         // Order
-        private const string Order_Endpoint = "order";
-        private const string Order_Id_Endpoint = "order/{id}";
-        private const string Order_OpenOrders_Endpoint = "openOrders";
-        private const string Order_AllOrders_Endpoint = "allOrders";
+        protected const string Order_Endpoint = "order";
+        protected const string Order_Id_Endpoint = "order/{id}";
+        protected const string Order_OpenOrders_Endpoint = "openOrders";
+        protected const string Order_AllOrders_Endpoint = "allOrders";
 
         // Order Book
-        private const string OrderBook_Endpoint = "orderBook";
+        protected const string OrderBook_Endpoint = "orderBook";
 
         // PinCode
-        private const string PinCode_Endpoint = "account/pincode";
-        private const string PinCode_Status_Endpoint = "account/pincode-status";
+        protected const string PinCode_Endpoint = "account/pincode";
+        protected const string PinCode_Status_Endpoint = "account/pincode-status";
 
         // Price Graph
-        private const string PriceGraph_Config_Endpoint = "pricegraph/config";
-        private const string PriceGraph_SymbolInfo_Endpoint = "pricegraph/symbol_info";
-        private const string PriceGraph_Symbols_Endpoint = "pricegraph/symbols";
-        private const string PriceGraph_Time_Endpoint = "pricegraph/time";
-        private const string PriceGraph_Search_Endpoint = "pricegraph/search";
-        private const string PriceGraph_History_Endpoint = "pricegraph/history";
-        private const string PriceGraph_MobileHistory_Endpoint = "pricegraph/mobile-history";
+        protected const string PriceGraph_Config_Endpoint = "pricegraph/config";
+        protected const string PriceGraph_SymbolInfo_Endpoint = "pricegraph/symbol_info";
+        protected const string PriceGraph_Symbols_Endpoint = "pricegraph/symbols";
+        protected const string PriceGraph_Time_Endpoint = "pricegraph/time";
+        protected const string PriceGraph_Search_Endpoint = "pricegraph/search";
+        protected const string PriceGraph_History_Endpoint = "pricegraph/history";
+        protected const string PriceGraph_MobileHistory_Endpoint = "pricegraph/mobile-history";
 
         // Server
-        private const string Server_Version_Endpoint = "server/version";
-        private const string Server_Time_Endpoint = "server/time";
-        private const string Server_MobileVersion_Endpoint = "server/mobile/version";
-        private const string Server_ExchangeInfo_Endpoint = "server/exchangeInfo";
-        private const string Server_Ping_Endpoint = "server/ping";
+        protected const string Server_Version_Endpoint = "server/version";
+        protected const string Server_Time_Endpoint = "server/time";
+        protected const string Server_MobileVersion_Endpoint = "server/mobile/version";
+        protected const string Server_ExchangeInfo_Endpoint = "server/exchangeInfo";
+        protected const string Server_Ping_Endpoint = "server/ping";
 
         // Ticker
-        private const string Ticker_Endpoint = "ticker";
-        private const string Ticker_Currency_Endpoint = "ticker/currency";
+        protected const string Ticker_Endpoint = "ticker";
+        protected const string Ticker_Currency_Endpoint = "ticker/currency";
 
         // Token
-        private const string Token_Endpoint = "token";
-        private const string Token_Mobile_Endpoint = "token/mobile";
-        private const string Token_Refresh_Endpoint = "token/refresh";
+        protected const string Token_Endpoint = "token";
+        protected const string Token_Mobile_Endpoint = "token/mobile";
+        protected const string Token_Refresh_Endpoint = "token/refresh";
 
         // Trade
-        private const string TradesEndpoint = "trades";
+        protected const string TradesEndpoint = "trades";
 
         #endregion
 
@@ -500,7 +500,7 @@ namespace BtcTurk.Net
         public async Task<WebCallResult<BtcTurkKline[]>> GetPriceGraphMobileHistoryAsync(string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default)
         => await GetPriceGraphHistoryCoreAsync(PriceGraph_MobileHistory_Endpoint, symbol, period, startTime, endTime,ct);
 
-        private async Task<WebCallResult<BtcTurkKline[]>> GetPriceGraphHistoryCoreAsync(string endpoint, string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default)
+        protected virtual async Task<WebCallResult<BtcTurkKline[]>> GetPriceGraphHistoryCoreAsync(string endpoint, string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object> {
                 { "symbol", symbol },
@@ -647,6 +647,10 @@ namespace BtcTurk.Net
         #region Private Methods
         protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postPosition, ArrayParametersSerialization arraySerialization, int requestId)
         {
+            return this.BtcTurkConstructRequest(uri, method, parameters, signed, postPosition, arraySerialization, requestId);
+        }
+        protected virtual IRequest BtcTurkConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, PostParameters postPosition, ArrayParametersSerialization arraySerialization, int requestId)
+        {
             if (parameters == null)
                 parameters = new Dictionary<string, object>();
 
@@ -687,14 +691,11 @@ namespace BtcTurk.Net
             return request;
         }
 
-        /*
-        protected override bool IsErrorResponse(JToken data)
-        {
-            return data.HasValues && data["success"] != null && (bool)data["success"] == false;
-        }
-        */
-
         protected override Error ParseErrorResponse(JToken error)
+        {
+            return this.BtcTurkParseErrorResponse(error);
+        }
+        protected virtual Error BtcTurkParseErrorResponse(JToken error)
         {
             if (error["code"] == null || error["message"] == null)
                 return new ServerError(error.ToString());
@@ -702,16 +703,16 @@ namespace BtcTurk.Net
             return new ServerError($"{(string)error["code"]}, {(string)error["message"]}");
         }
 
-        protected Uri GetUrl(string endpoint, string version = null)
+        protected virtual Uri GetUrl(string endpoint, string version = null)
         {
             return string.IsNullOrEmpty(version) ? new Uri($"{BaseAddress.TrimEnd('/')}/{endpoint}") : new Uri($"{BaseAddress.TrimEnd('/')}/v{version}/{endpoint}");
         }
 
-        private void Configure(BtcTurkClientOptions options)
+        protected virtual void Configure(BtcTurkClientOptions options)
         {
         }
 
-        private static long ToUnixTimestamp(DateTime time)
+        protected static long ToUnixTimestamp(DateTime time)
         {
             return (long)(time - new DateTime(1970, 1, 1)).TotalMilliseconds;
         }

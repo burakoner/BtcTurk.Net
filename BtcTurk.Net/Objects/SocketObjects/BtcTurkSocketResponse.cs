@@ -25,7 +25,7 @@ namespace BtcTurk.Net.Objects.SocketObjects
         public string Data { get; set; } = "";
     }
 
-    internal class WSObjectConverter : JsonConverter
+    public class WSObjectConverter : JsonConverter
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {

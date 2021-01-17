@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace BtcTurk.Net.Objects.SocketObjects
 {
-    internal class BtcTurkSocketRequest
+    public class BtcTurkSocketRequest
     {
         [JsonProperty("type")]
         public int Type { get; set; }
@@ -35,7 +35,7 @@ namespace BtcTurk.Net.Objects.SocketObjects
 
 
     /*
-    internal class BtcTurkAuthenticatedRequest
+    public class BtcTurkAuthenticatedRequest
     {
         [JsonProperty("op")]
         public string Operation { get; set; }
@@ -52,7 +52,7 @@ namespace BtcTurk.Net.Objects.SocketObjects
         }
     }
 
-    internal class BtcTurkSubscribeRequest
+    public class BtcTurkSubscribeRequest
     {
         [JsonProperty("sub")]
         public string Topic { get; set; }

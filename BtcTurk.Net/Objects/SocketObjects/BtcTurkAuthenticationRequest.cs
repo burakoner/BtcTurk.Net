@@ -2,7 +2,7 @@
 
 namespace BtcTurk.Net.Objects.SocketObjects
 {
-    internal class BtcTurkAuthenticationRequest
+    public class BtcTurkAuthenticationRequest
     {
         [JsonProperty("op")]
         public string Operation { get; set; }
