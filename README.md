@@ -333,6 +333,9 @@ foreach (var pair in pairs)
 ```
 
 ## Release Notes
+* Version 2.5.0 - 18 Sep 2021
+    * Synced with CryptoExchange.Net v4.1.0
+
 * Version 2.1.0 - 31 Mar 2021
     * Updated dependencies
 

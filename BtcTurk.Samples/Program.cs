@@ -1,6 +1,7 @@
 ﻿using BtcTurk.Net;
 using BtcTurk.Net.Objects.SocketObjects;
 using CryptoExchange.Net.Sockets;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,7 @@ namespace BtcTurk.Samples
             BtcTurkClient apiClient = new BtcTurkClient();
 
             // Public Api Endpoints:
+            var btc__ = apiClient.GetTicker();
             var btc00 = apiClient.GetServerVersion();
             var btc01 = apiClient.GetServerTime();
             var btc02 = apiClient.GetServerVersion();
@@ -43,7 +45,7 @@ namespace BtcTurk.Samples
 
 
             /* BtcTurkSocketClient Object */
-            var sock = new BtcTurkSocketClient(new BtcTurkSocketClientOptions { LogVerbosity = CryptoExchange.Net.Logging.LogVerbosity.Debug });
+            var sock = new BtcTurkSocketClient(new BtcTurkSocketClientOptions { LogLevel = LogLevel.Debug });
 
             /* Public Socket Endpoints: */
             var subs = new List<UpdateSubscription>();
