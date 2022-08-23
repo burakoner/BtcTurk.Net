@@ -1,22 +1,26 @@
-﻿using CryptoExchange.Net.Attributes;
+﻿using CryptoExchange.Net.Objects;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace BtcTurk.Net.Objects
 {
     public class BtcTurkApiResponse<T>
     {
-        [JsonOptionalProperty, JsonProperty("success")]
+        [JsonProperty("success", NullValueHandling = NullValueHandling.Ignore)]
         public bool Success { get; set; }
-        
-        [JsonOptionalProperty, JsonProperty("message")]
-        public string ErrorMessage { get; set; } = "";
-        [JsonOptionalProperty, JsonProperty("code")]
+
+        [JsonProperty("message", NullValueHandling = NullValueHandling.Ignore)]
+        public string ErrorMessage { get; set; }
+        [JsonProperty("code", NullValueHandling = NullValueHandling.Ignore)]
         public int ErrorCode { get; set; }
 
-        [JsonOptionalProperty, JsonProperty("data")]
+        [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]
         public T Data { get; set; }
+    }
+
+    public class BtcTurkApiError : Error
+    {
+        public BtcTurkApiError(int? code, string message, object data) : base(code, message, data)
+        {
+        }
     }
 }

@@ -3,7 +3,6 @@ using CryptoExchange.Net.Logging;
 using CryptoExchange.Net.Objects;
 using CryptoExchange.Net.Sockets;
 using BtcTurk.Net.Converters;
-using BtcTurk.Net.Interfaces;
 using BtcTurk.Net.Objects;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,76 +15,71 @@ using System.Threading.Tasks;
 using BtcTurk.Net.Objects.SocketObjects;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
+using BtcTurk.Net.Objects.ClientObjects;
+using BtcTurk.Net.Helpers;
+using CryptoExchange.Net.Authentication;
+using System.Threading;
 
 namespace BtcTurk.Net
 {
-    public class BtcTurkSocketClient : SocketClient, IBtcTurkSocketClient
+    public class BtcTurkSocketClient : BaseSocketClient
     {
-        #region Fields
-        protected static BtcTurkSocketClientOptions defaultOptions = new BtcTurkSocketClientOptions();
-        protected static BtcTurkSocketClientOptions DefaultOptions => defaultOptions.Copy();
+        #region Internal Fields
+        internal BtcTurkSocketClientOptions Options { get; }
+        internal BtcTurkSocketClientSingleStream SingleSocket { get; }
         #endregion
 
-        #region Ctor
-        /// <summary>
-        /// Create a new instance of BtcTurkSocketClient with default options
-        /// </summary>
-        public BtcTurkSocketClient() : this(DefaultOptions)
+        #region Constructor/Destructor
+        public BtcTurkSocketClient() : this(BtcTurkSocketClientOptions.Default)
         {
         }
 
-        /// <summary>
-        /// Create a new instance of BtcTurkSocketClient using provided options
-        /// </summary>
-        /// <param name="options">The options to use for this client</param>
-        public BtcTurkSocketClient(BtcTurkSocketClientOptions options) : base("BtcTurk", options, options.ApiCredentials == null ? null : new BtcTurkAuthenticationProvider(options.ApiCredentials, ArrayParametersSerialization.MultipleValues))
+        public BtcTurkSocketClient(BtcTurkSocketClientOptions options) : base("BtcTurk Stream Api", options)
         {
-            Configure(options);
+            SingleSocket= AddApiClient(new BtcTurkSocketClientSingleStream(log, this, options));
         }
         #endregion
 
-        #region General Methods
-        protected virtual void Configure(BtcTurkSocketClientOptions options)
-        {
-        }
-
-        /// <summary>
-        /// Set the default options to be used when creating new socket clients
-        /// </summary>
-        /// <param name="options">The options to use for new clients</param>
+        #region Common Methods
         public static void SetDefaultOptions(BtcTurkSocketClientOptions options)
         {
-            defaultOptions = options;
+            BtcTurkSocketClientOptions.Default = options;
+        }
+
+        public virtual void SetApiCredentials(string apiKey, string apiSecret)
+        {
+            var credentials = new ApiCredentials(apiKey, apiSecret);
+            SingleSocket.SetApiCredentials(credentials);
         }
         #endregion
 
         #region Subscriptions
         public virtual CallResult<UpdateSubscription> SubscribeToTicker(string symbol, Action<BtcTurkStreamTickerSingle> onData) => SubscribeToTickerAsync(symbol, onData).Result;
-        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToTickerAsync(string symbol, Action<BtcTurkStreamTickerSingle> onData)
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToTickerAsync(string symbol, Action<BtcTurkStreamTickerSingle> onData, CancellationToken ct = default)
         {
             var request = new BtcTurkSocketRequest(151, "ticker", symbol, true);
             var internalHandler = new Action<DataEvent< BtcTurkSocketResponse>>(data => onData(JsonConvert.DeserializeObject<BtcTurkStreamTickerSingle>(data.Data.Data)));
-            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
+            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler, ct).ConfigureAwait(false);
         }
 
         public virtual CallResult<UpdateSubscription> SubscribeToTickers(Action<BtcTurkStreamTickerAll> onData) => SubscribeToTickersAsync(onData).Result;
-        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToTickersAsync(Action<BtcTurkStreamTickerAll> onData)
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToTickersAsync(Action<BtcTurkStreamTickerAll> onData, CancellationToken ct = default)
         {
             var request = new BtcTurkSocketRequest(151, "ticker", "all", true);
             var internalHandler = new Action<DataEvent<BtcTurkSocketResponse>>(data => onData(JsonConvert.DeserializeObject<BtcTurkStreamTickerAll>(data.Data.Data)));
-            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
+            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler, ct).ConfigureAwait(false);
         }
 
         public virtual CallResult<UpdateSubscription> SubscribeToKlines(string symbol, BtcTurkPeriod period, Action<BtcTurkStreamKline> onData) => SubscribeToKlinesAsync(symbol, period, onData).Result;
-        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToKlinesAsync(string symbol, BtcTurkPeriod period, Action<BtcTurkStreamKline> onData)
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToKlinesAsync(string symbol, BtcTurkPeriod period, Action<BtcTurkStreamKline> onData, CancellationToken ct = default)
         {
             var request = new BtcTurkSocketRequest(151, "tradeview", $"{symbol}_{JsonConvert.SerializeObject(period, new PeriodEnumConverter(false))}", true);
             var internalHandler = new Action<DataEvent<BtcTurkSocketResponse>>(data => onData(JsonConvert.DeserializeObject<BtcTurkStreamKline>(data.Data.Data)));
-            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
+            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler, ct).ConfigureAwait(false);
         }
 
         public virtual CallResult<UpdateSubscription> SubscribeToTrades(string symbol, Action<BtcTurkStreamTradeList> onListData, Action<BtcTurkStreamTradeSingle> onRowData) => SubscribeToTradesAsync(symbol, onListData, onRowData).Result;
-        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToTradesAsync(string symbol, Action<BtcTurkStreamTradeList> onListData, Action<BtcTurkStreamTradeSingle> onRowData)
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToTradesAsync(string symbol, Action<BtcTurkStreamTradeList> onListData, Action<BtcTurkStreamTradeSingle> onRowData, CancellationToken ct = default)
         {
             var request = new BtcTurkSocketRequest(151, "trade", symbol, true);
             var internalHandler = new Action<DataEvent<BtcTurkSocketResponse>>(data =>
@@ -94,19 +88,19 @@ namespace BtcTurk.Net
                   if (data.Data.Model == 422) onRowData(JsonConvert.DeserializeObject<BtcTurkStreamTradeSingle>(data.Data.Data));
               }
             );
-            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
+            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler, ct).ConfigureAwait(false);
         }
 
         public virtual CallResult<UpdateSubscription> SubscribeToOrderBookFull(string symbol, Action<BtcTurkStreamOrderBookFull> onData) => SubscribeToOrderBookFullAsync(symbol, onData).Result;
-        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToOrderBookFullAsync(string symbol, Action<BtcTurkStreamOrderBookFull> onData)
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToOrderBookFullAsync(string symbol, Action<BtcTurkStreamOrderBookFull> onData, CancellationToken ct = default)
         {
             var request = new BtcTurkSocketRequest(151, "orderbook", symbol, true);
             var internalHandler = new Action<DataEvent<BtcTurkSocketResponse>>(data => onData(JsonConvert.DeserializeObject<BtcTurkStreamOrderBookFull>(data.Data.Data)));
-            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
+            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler, ct).ConfigureAwait(false);
         }
 
         public virtual CallResult<UpdateSubscription> SubscribeToOrderBookDiff(string symbol, Action<BtcTurkStreamOrderBookFull> onFullData, Action<BtcTurkStreamOrderBookDifference> onDiffData) => SubscribeToOrderBookDiffAsync(symbol, onFullData, onDiffData).Result;
-        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToOrderBookDiffAsync(string symbol, Action<BtcTurkStreamOrderBookFull> onFullData, Action<BtcTurkStreamOrderBookDifference> onDiffData)
+        public virtual async Task<CallResult<UpdateSubscription>> SubscribeToOrderBookDiffAsync(string symbol, Action<BtcTurkStreamOrderBookFull> onFullData, Action<BtcTurkStreamOrderBookDifference> onDiffData, CancellationToken ct = default)
         {
             var request = new BtcTurkSocketRequest(151, "obdiff", symbol, true);
             var internalHandler = new Action<DataEvent<BtcTurkSocketResponse>>(data =>
@@ -115,40 +109,83 @@ namespace BtcTurk.Net
                 if (data.Data.Model == 432) onDiffData(JsonConvert.DeserializeObject<BtcTurkStreamOrderBookDifference>(data.Data.Data));
             }
             );
-            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler).ConfigureAwait(false);
+            return await SubscribeAsync(request.RequestObject(), null, false, internalHandler, ct).ConfigureAwait(false);
         }
 
         #endregion
 
-        #region Private Methods
-        protected override SocketConnection GetSocketConnection(string address, bool authenticated)
+        public virtual async Task<CallResult<bool>> Login(string username, string token)
         {
-            return this.BtcTurkSocketConnection(address, authenticated);
-        }
-        protected virtual SocketConnection BtcTurkSocketConnection(string address, bool authenticated)
-        {
-            var socketResult = sockets.Where(s => s.Value.Socket.Url == address && (s.Value.Authenticated == authenticated || !authenticated) && s.Value.Connected).OrderBy(s => s.Value.SubscriptionCount).FirstOrDefault();
-            var result = socketResult.Equals(default(KeyValuePair<int, SocketConnection>)) ? null : socketResult.Value;
-            if (result != null)
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(token))
+                return new CallResult<bool>(false);
+
+            // Try to Login
+            var request = new BtcTurkSocketLoginRequest(111, NextId(), username, token);
+            CallResult<bool> result = new CallResult<bool>(false);
+            var response = await QueryAsync<BtcTurkSocketLoginResponse>(request, false);
+
+            /*
+            GetSocketConnection()
+
+            /*
+            , data =>
             {
-                if (result.SubscriptionCount < SocketCombineTarget || (sockets.Count >= MaxSocketConnections && sockets.All(s => s.Value.SubscriptionCount >= SocketCombineTarget)))
+                if ((string)data["op"] != "auth")
+                    return false;
+
+                /*
+                var authResponse = Deserialize<BtcTurkSocketAuthDataResponse<object>>(data, false);
+                if (!authResponse.Success)
                 {
-                    // Use existing socket if it has less than target connections OR it has the least connections and we can't make new
-                    return result;
+                    log.Write(LogVerbosity.Warning, "Authorization failed: " + authResponse.Error);
+                    result = new CallResult<bool>(false, authResponse.Error);
+                    return true;
                 }
-            }
+                if (!authResponse.Data.IsSuccessful)
+                {
+                    log.Write(LogVerbosity.Warning, "Authorization failed: " + authResponse.Data.ErrorMessage);
+                    result = new CallResult<bool>(false, new ServerError(authResponse.Data.ErrorCode, authResponse.Data.ErrorMessage));
+                    return true;
+                }
+                * /
 
-            // Create new socket
-            var socket = CreateSocket(address);
-            var socketConnection = new SocketConnection(this, socket);
-            socketConnection.UnhandledMessage += HandleUnhandledMessage;
-            foreach (var kvp in genericHandlers)
+                log.Write(LogLevel.Debug, "Authorization completed");
+                result = new CallResult<bool>(true, null);
+                return true;
+            });
+                */
+
+            return result;
+
+
+
+
+
+        }
+
+        #region Private Methods
+        protected override async Task<CallResult<SocketConnection>> GetSocketConnection(SocketApiClient apiClient, string address, bool authenticated)
+        {
+            address = BtcTurkApiAddresses.Default.WebsocketAddress;
+            
+            /*
+            if (((OkexSocketClientOptions)ClientOptions).DemoTradingService)
             {
-                var handler = SocketSubscription.CreateForIdentifier(NextId(), kvp.Key, false, kvp.Value);
-                socketConnection.AddSubscription(handler);
+                address = authenticated
+                    ? "wss://wspap.okx.com:8443/ws/v5/private?brokerId=9999"
+                    : "wss://wspap.okx.com:8443/ws/v5/public?brokerId=9999";
             }
+            */
+            return await base.GetSocketConnection(apiClient, address, authenticated);
+        }
 
-            return socketConnection;
+        internal virtual Task<CallResult<T>> QueryAsync<T>(object request, bool authenticated)
+        {
+            return QueryAsync<T>(this.SingleSocket, request, authenticated);
+        }
+        internal virtual Task<CallResult<UpdateSubscription>> SubscribeAsync<T>(object request, string identifier, bool authenticated, Action<DataEvent<T>> dataHandler, CancellationToken ct)
+        {
+            return SubscribeAsync(this.SingleSocket, request, identifier, authenticated, dataHandler, ct);
         }
 
         protected override bool HandleQueryResponse<T>(SocketConnection s, object request, JToken data, out CallResult<T> callResult)
@@ -158,21 +195,26 @@ namespace BtcTurk.Net
         protected virtual bool BtcTurkHandleQueryResponse<T>(SocketConnection s, object request, JToken data, out CallResult<T> callResult)
         {
             // out params
-            callResult = new CallResult<T>(default, null);
+            callResult = new CallResult<T>(null);
 
-            var isV2Response = (string)data["op"] == "req";
-            if (isV2Response)
+            if(data is JArray jarr)
             {
-                var desResult = Deserialize<T>(data, false);
-                if (!desResult.Success)
+                var isV2Response = jarr.Count==2 && jarr.LastOrDefault()["type"] != null;
+                if (isV2Response)
                 {
-                    log.Write(LogLevel.Warning, $"Failed to deserialize data: {desResult.Error}. Data: {data}");
-                    return false;
+                    var desResult = Deserialize<T>(data);
+                    if (!desResult.Success)
+                    {
+                        log.Write(LogLevel.Warning, $"Failed to deserialize data: {desResult.Error}. Data: {data}");
+                        return false;
+                    }
+
+                    callResult = new CallResult<T>(desResult.Data);
+                    return true;
                 }
 
-                callResult = new CallResult<T>(desResult.Data, null);
-                return true;
             }
+
 
             return true;
         }
@@ -184,7 +226,7 @@ namespace BtcTurk.Net
         protected virtual bool BtcTurkHandleSubscriptionResponse(SocketConnection s, SocketSubscription subscription, object request, JToken message, out CallResult<object> callResult)
         {
             // out params
-            callResult = new CallResult<object>(null, null);
+            callResult = new CallResult<object>(null);
 
             // Check Point
             if (message == null || message[0] == null || message.Count() != 2)
@@ -209,20 +251,20 @@ namespace BtcTurk.Net
                             if (req[0] is int && req[1] is BtcTurkSocketRequest)
                             {
                                 BtcTurkSocketRequest r = (BtcTurkSocketRequest)req[1];
-                                var subResponse = Deserialize<BtcTurkStreamAnswer>(message[1], false);
+                                var subResponse = Deserialize<BtcTurkStreamAnswer>(message[1]);
 
                                 if (subResponse.Data.Message == $"join|{r.Channel}:{r.Event}")
                                 {
                                     if (subResponse.Data.OK)
                                     {
                                         log.Write(LogLevel.Debug, "Subscription completed");
-                                        callResult = new CallResult<object>(subResponse.Data, null);
+                                        callResult = new CallResult<object>(subResponse.Data);
                                         return true;
                                     }
                                     else
                                     {
                                         log.Write(LogLevel.Warning, "Subscription failed: " + subResponse.Error);
-                                        callResult = new CallResult<object>(null, subResponse.Error);
+                                        callResult = new CallResult<object>(subResponse.Error);
                                         return false;
                                     }
                                 }
@@ -243,11 +285,7 @@ namespace BtcTurk.Net
             return false;
         }
 
-        protected override bool MessageMatchesHandler(JToken message, object request)
-        {
-            return this.BtcTurkMessageMatchesHandler(message, request);
-        }
-        protected virtual bool BtcTurkMessageMatchesHandler(JToken message, object request)
+        protected override bool MessageMatchesHandler(SocketConnection socketConnection, JToken message, object request)
         {
             try
             {
@@ -350,12 +388,7 @@ namespace BtcTurk.Net
 
             return false;
         }
-
-        protected override bool MessageMatchesHandler(JToken message, string identifier)
-        {
-            return this.BtcTurkMessageMatchesHandler(message, identifier);
-        }
-        protected virtual bool BtcTurkMessageMatchesHandler(JToken message, string identifier)
+        protected override bool MessageMatchesHandler(SocketConnection socketConnection, JToken message, string identifier)
         {
             if (message.Type != JTokenType.Object)
                 return false;
@@ -363,16 +396,15 @@ namespace BtcTurk.Net
             return false;
         }
 
-        protected override async Task<CallResult<bool>> AuthenticateSocketAsync(SocketConnection s)
+        protected override /*async*/ Task<CallResult<bool>> AuthenticateSocketAsync(SocketConnection s)
         {
-            return await this.BtcTurkAuthenticateSocket(s);
-        }
-        protected virtual async Task<CallResult<bool>> BtcTurkAuthenticateSocket(SocketConnection s)
-        {
+            throw new NotImplementedException();
+
+            /*
             if (authProvider == null)
                 return new CallResult<bool>(false, new NoApiCredentialsError());
 
-            var authParams = authProvider.AddAuthenticationToParameters(""/*baseAddressAuthenticated*/, HttpMethod.Get, new Dictionary<string, object>(), true, HttpMethodParameterPosition.InBody, ArrayParametersSerialization.Array);
+            var authParams = authProvider.AddAuthenticationToParameters(""/*baseAddressAuthenticated* /, HttpMethod.Get, new Dictionary<string, object>(), true, HttpMethodParameterPosition.InBody, ArrayParametersSerialization.Array);
             var authObjects = new BtcTurkAuthenticationRequest
             {
                 AccessKeyId = authProvider.Credentials.Key.GetString(),
@@ -403,7 +435,7 @@ namespace BtcTurk.Net
                     result = new CallResult<bool>(false, new ServerError(authResponse.Data.ErrorCode, authResponse.Data.ErrorMessage));
                     return true;
                 }
-                */
+                * /
 
                 log.Write(LogLevel.Debug, "Authorization completed");
                 result = new CallResult<bool>(true, null);
@@ -411,6 +443,7 @@ namespace BtcTurk.Net
             });
 
             return result;
+            */
         }
 
         protected override async Task<bool> UnsubscribeAsync(SocketConnection connection, SocketSubscription s)
@@ -441,7 +474,7 @@ namespace BtcTurk.Net
             */
 
             var result = false;
-            await connection.SendAndWaitAsync(unsub, ResponseTimeout, data =>
+            await connection.SendAndWaitAsync(unsub, TimeSpan.FromSeconds(10), data =>
             {
                 if (data.Type != JTokenType.Object)
                     return false;
@@ -457,7 +490,24 @@ namespace BtcTurk.Net
             });
             return result;
         }
+
+        #endregion
+    }
+
+    public class BtcTurkSocketClientSingleStream : SocketApiClient
+    {
+        #region Internal Fields
+        internal readonly BtcTurkSocketClient _baseClient;
+        internal readonly Log _log;
         #endregion
 
+        internal BtcTurkSocketClientSingleStream(Log log, BtcTurkSocketClient baseClient, BtcTurkSocketClientOptions options) : base(options, options.SingleStreamsOptions)
+        {
+            _baseClient = baseClient;
+            _log = log;
+        }
+
+        protected override AuthenticationProvider CreateAuthenticationProvider(ApiCredentials credentials)
+            => new BtcTurkAuthenticationProvider(credentials);
     }
 }

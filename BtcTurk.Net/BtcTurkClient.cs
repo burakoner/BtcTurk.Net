@@ -1,31 +1,30 @@
-﻿using CryptoExchange.Net;
-using CryptoExchange.Net.Authentication;
-using CryptoExchange.Net.Converters;
-using CryptoExchange.Net.Interfaces;
-using CryptoExchange.Net.Objects;
-using BtcTurk.Net.Interfaces;
+﻿using BtcTurk.Net.Converters;
+using BtcTurk.Net.Helpers;
 using BtcTurk.Net.Objects;
+using BtcTurk.Net.Objects.ClientObjects;
+using CryptoExchange.Net;
+using CryptoExchange.Net.Authentication;
+using CryptoExchange.Net.Logging;
+using CryptoExchange.Net.Objects;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
-using BtcTurk.Net.Converters;
-using System.Security.Cryptography;
-using System.Text;
 using System.Net.Http;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace BtcTurk.Net
 {
-    public class BtcTurkClient : RestClient, IBtcTurkClient
+    public class BtcTurkClient : BaseRestClient
     {
-        #region fields
-        protected static BtcTurkClientOptions defaultOptions = new BtcTurkClientOptions();
-        protected static BtcTurkClientOptions DefaultOptions => defaultOptions.Copy();
+        #region Internal Fields
+        internal BtcTurkClientOptions Options { get; }
+        internal BtcTurkClientSingleApi SingleApi { get; }
+        #endregion
 
+        #region Endpoints
         // Api Version
         protected const string V1 = "1";
         protected const string V2 = "2";
@@ -199,42 +198,33 @@ namespace BtcTurk.Net
 
         #endregion
 
-        #region constructor/destructor
+        #region Constructors
         /// <summary>
         /// Create a new instance of BtcTurkClient using the default options
         /// </summary>
-        public BtcTurkClient() : this(DefaultOptions)
+        public BtcTurkClient() : this(BtcTurkClientOptions.Default)
         {
         }
 
         /// <summary>
         /// Create a new instance of the BtcTurkClient with the provided options
         /// </summary>
-        public BtcTurkClient(BtcTurkClientOptions options) : base("BtcTurk", options, options.ApiCredentials == null ? null : new BtcTurkAuthenticationProvider(options.ApiCredentials, ArrayParametersSerialization.MultipleValues))
+        public BtcTurkClient(BtcTurkClientOptions options) : base("BtcTurk Rest Api", options)
         {
-            arraySerialization = ArrayParametersSerialization.MultipleValues;
-            Configure(options);
+            Options = options;
+            SingleApi = AddApiClient(new BtcTurkClientSingleApi(log, this, options));
         }
         #endregion
 
-        #region General Methods
-        /// <summary>
-        /// Sets the default options to use for new clients
-        /// </summary>
-        /// <param name="options">The options to use for new clients</param>
+        #region Common Methods
         public static void SetDefaultOptions(BtcTurkClientOptions options)
         {
-            defaultOptions = options;
+            BtcTurkClientOptions.Default = options;
         }
 
-        /// <summary>
-        /// Set the API key and secret
-        /// </summary>
-        /// <param name="apiKey">The api key</param>
-        /// <param name="apiSecret">The api secret</param>
-        public void SetApiCredentials(string apiKey, string apiSecret)
+        public virtual void SetApiCredentials(string apiKey, string apiSecret)
         {
-            SetAuthenticationProvider(new BtcTurkAuthenticationProvider(new ApiCredentials(apiKey, apiSecret), ArrayParametersSerialization.MultipleValues ));
+            SingleApi.SetApiCredentials(new ApiCredentials(apiKey, apiSecret));
         }
         #endregion
 
@@ -242,14 +232,15 @@ namespace BtcTurk.Net
         public WebCallResult<BtcTurkBalance[]> GetBalances(CancellationToken ct = default) => GetBalancesAsync(ct).Result;
         public async Task<WebCallResult<BtcTurkBalance[]>> GetBalancesAsync(CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkBalance[]>>(GetUrl(V1_Balances_Endpoint, V1), method: HttpMethod.Get, cancellationToken:ct,   checkResult: false, signed: true).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkBalance[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkBalance[]>>(SingleApi.GetUri(V1_Balances_Endpoint, V1), method: HttpMethod.Get, ct, signed: true).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkBalance[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkBalance[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkBalance[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkPlacedOrder> PlaceOrder(string pairSymbol, decimal quantity, BtcTurkOrderSide orderSide, BtcTurkOrderMethod orderMethod, decimal? price = null, decimal? stopPrice = null, string clientOrderId = null, CancellationToken ct = default) => PlaceOrderAsync(pairSymbol, quantity, orderSide, orderMethod, price, stopPrice, clientOrderId,ct).Result;
-        public async Task<WebCallResult<BtcTurkPlacedOrder>> PlaceOrderAsync(string pairSymbol,decimal quantity,BtcTurkOrderSide orderSide,BtcTurkOrderMethod orderMethod,decimal? price = null,decimal? stopPrice = null,string clientOrderId = null, CancellationToken ct = default)
+        public WebCallResult<BtcTurkPlacedOrder> PlaceOrder(string pairSymbol, decimal quantity, BtcTurkOrderSide orderSide, BtcTurkOrderMethod orderMethod, decimal? price = null, decimal? stopPrice = null, string clientOrderId = null, CancellationToken ct = default) => PlaceOrderAsync(pairSymbol, quantity, orderSide, orderMethod, price, stopPrice, clientOrderId, ct).Result;
+        public async Task<WebCallResult<BtcTurkPlacedOrder>> PlaceOrderAsync(string pairSymbol, decimal quantity, BtcTurkOrderSide orderSide, BtcTurkOrderMethod orderMethod, decimal? price = null, decimal? stopPrice = null, string clientOrderId = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
             {
@@ -262,13 +253,14 @@ namespace BtcTurk.Net
             parameters.AddOptionalParameter("stopPrice", stopPrice?.ToString(CultureInfo.InvariantCulture));
             parameters.AddOptionalParameter("newClientOrderId", clientOrderId);
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkPlacedOrder>>(GetUrl(V1_Order_Endpoint, V1), method:HttpMethod.Post, cancellationToken: ct, parameters: parameters, checkResult: false, signed: true).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkPlacedOrder>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkPlacedOrder>>(SingleApi.GetUri(V1_Order_Endpoint, V1), method: HttpMethod.Post, ct, parameters: parameters, signed: true).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkPlacedOrder>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkPlacedOrder>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkPlacedOrder>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<bool> CancelOrder(long orderId, CancellationToken ct = default) => CancelOrderAsync(orderId,ct).Result;
+        public WebCallResult<bool> CancelOrder(long orderId, CancellationToken ct = default) => CancelOrderAsync(orderId, ct).Result;
         public async Task<WebCallResult<bool>> CancelOrderAsync(long orderId, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -276,13 +268,14 @@ namespace BtcTurk.Net
                 { "id", orderId.ToString(CultureInfo.InvariantCulture) },
             };
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<object>>(GetUrl(V1_Order_Endpoint, V1), method: HttpMethod.Delete, cancellationToken: ct, parameters: parameters, checkResult: false, signed: true).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<bool>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<object>>(SingleApi.GetUri(V1_Order_Endpoint, V1), method: HttpMethod.Delete, ct, parameters: parameters, signed: true).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<bool>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<bool>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<bool>(result.ResponseStatusCode, result.ResponseHeaders, result.Success, null);
+            return result.As(result.Data.Success);
         }
 
-        public WebCallResult<BtcTurkOrder[]> GetAllOrders(string pairSymbol, long? startOrderId = null, DateTime? startTime = null, DateTime? endTime = null, int? limit = 100, int? page = 1, CancellationToken ct = default) => GetAllOrdersAsync(pairSymbol, startOrderId, startTime, endTime, limit, page,ct).Result;
+        public WebCallResult<BtcTurkOrder[]> GetAllOrders(string pairSymbol, long? startOrderId = null, DateTime? startTime = null, DateTime? endTime = null, int? limit = 100, int? page = 1, CancellationToken ct = default) => GetAllOrdersAsync(pairSymbol, startOrderId, startTime, endTime, limit, page, ct).Result;
         public async Task<WebCallResult<BtcTurkOrder[]>> GetAllOrdersAsync(string pairSymbol, long? startOrderId = null, DateTime? startTime = null, DateTime? endTime = null, int? limit = 100, int? page = 1, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -293,27 +286,29 @@ namespace BtcTurk.Net
             parameters.AddOptionalParameter("startTime", startTime != null ? ToUnixTimestamp(startTime.Value).ToString() : null);
             parameters.AddOptionalParameter("endTime", endTime != null ? ToUnixTimestamp(endTime.Value).ToString() : null);
             parameters.AddOptionalParameter("limit", limit != null ? limit : null);
-            parameters.AddOptionalParameter("page", page != null ? page-1 : null);
+            parameters.AddOptionalParameter("page", page != null ? page - 1 : null);
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkOrder[]>>(GetUrl(V1_AllOrders_Endpoint, V1), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false, signed: true).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkOrder[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOrder[]>>(SingleApi.GetUri(V1_AllOrders_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkOrder[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOrder[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkOrder[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkOpenOrders> GetOpenOrders(string pairSymbol = null, CancellationToken ct = default) => GetOpenOrdersAsync(pairSymbol,ct).Result;
-        public async Task<WebCallResult<BtcTurkOpenOrders>> GetOpenOrdersAsync(string pairSymbol=null, CancellationToken ct = default)
+        public WebCallResult<BtcTurkOpenOrders> GetOpenOrders(string pairSymbol = null, CancellationToken ct = default) => GetOpenOrdersAsync(pairSymbol, ct).Result;
+        public async Task<WebCallResult<BtcTurkOpenOrders>> GetOpenOrdersAsync(string pairSymbol = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
             parameters.AddOptionalParameter("pairSymbol", pairSymbol != null ? pairSymbol : null);
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkOpenOrders>>(GetUrl(V1_OpenOrders_Endpoint, V1), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false, signed: true).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkOpenOrders>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOpenOrders>>(SingleApi.GetUri(V1_OpenOrders_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkOpenOrders>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOpenOrders>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkOpenOrders>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkTrade[]> GetTradesV1(string pairSymbol, int last=50, CancellationToken ct = default) => GetTradesV1Async(pairSymbol, last,ct).Result;
+        public WebCallResult<BtcTurkTrade[]> GetTradesV1(string pairSymbol, int last = 50, CancellationToken ct = default) => GetTradesV1Async(pairSymbol, last, ct).Result;
         public async Task<WebCallResult<BtcTurkTrade[]>> GetTradesV1Async(string pairSymbol, int last = 50, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -322,13 +317,14 @@ namespace BtcTurk.Net
                 { "last", last.ToString() },
             };
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkTrade[]>>(GetUrl(V1_Trades_Endpoint, V1), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkTrade[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTrade[]>>(SingleApi.GetUri(V1_Trades_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkTrade[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkTransaction[]> GetTradeTransactions(string[] symbol = null,BtcTurkOrderSide[] type = null,DateTime? startTime = null,DateTime? endTime = null, CancellationToken ct = default) => GetTradeTransactionsAsync(symbol ,type,startTime,endTime ,ct).Result;
+        public WebCallResult<BtcTurkTransaction[]> GetTradeTransactions(string[] symbol = null, BtcTurkOrderSide[] type = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default) => GetTradeTransactionsAsync(symbol, type, startTime, endTime, ct).Result;
         public async Task<WebCallResult<BtcTurkTransaction[]>> GetTradeTransactionsAsync(string[] symbol = null, BtcTurkOrderSide[] type = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
@@ -337,13 +333,14 @@ namespace BtcTurk.Net
             parameters.AddOptionalParameter("startTime", startTime != null ? ToUnixTimestamp(startTime.Value).ToString() : null);
             parameters.AddOptionalParameter("endTime", endTime != null ? ToUnixTimestamp(endTime.Value).ToString() : null);
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkTransaction[]>>(GetUrl(V1_TransactionsTrade_Endpoint, V1), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkTransaction[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTransaction[]>>(SingleApi.GetUri(V1_TransactionsTrade_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkTransaction[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkTransaction[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkPairTransaction[]> GetTradeTransactionsByPair(string pairSymbol, CancellationToken ct = default) => GetTradeTransactionsByPairAsync(pairSymbol,ct).Result;
+        public WebCallResult<BtcTurkPairTransaction[]> GetTradeTransactionsByPair(string pairSymbol, CancellationToken ct = default) => GetTradeTransactionsByPairAsync(pairSymbol, ct).Result;
         public async Task<WebCallResult<BtcTurkPairTransaction[]>> GetTradeTransactionsByPairAsync(string pairSymbol, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -351,13 +348,14 @@ namespace BtcTurk.Net
                 { "pairSymbol", pairSymbol },
             };
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkPairTransaction[]>>(GetUrl(V1_TransactionsTradeByPair_Endpoint.Replace("{pairSymbol}",pairSymbol), V1), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkPairTransaction[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkPairTransaction[]>>(SingleApi.GetUri(V1_TransactionsTradeByPair_Endpoint.Replace("{pairSymbol}", pairSymbol), V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkPairTransaction[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkPairTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkPairTransaction[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkCryptoFiatTransaction[]> GetCryptoTransactions(string[] symbol = null, BtcTurkOrderSide[] type = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default) => GetCryptoTransactionsAsync(symbol, type, startTime, endTime,ct).Result;
+        public WebCallResult<BtcTurkCryptoFiatTransaction[]> GetCryptoTransactions(string[] symbol = null, BtcTurkOrderSide[] type = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default) => GetCryptoTransactionsAsync(symbol, type, startTime, endTime, ct).Result;
         public async Task<WebCallResult<BtcTurkCryptoFiatTransaction[]>> GetCryptoTransactionsAsync(string[] symbol = null, BtcTurkOrderSide[] type = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
@@ -366,13 +364,14 @@ namespace BtcTurk.Net
             parameters.AddOptionalParameter("startTime", startTime != null ? ToUnixTimestamp(startTime.Value).ToString() : null);
             parameters.AddOptionalParameter("endTime", endTime != null ? ToUnixTimestamp(endTime.Value).ToString() : null);
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkCryptoFiatTransaction[]>>(GetUrl(V1_TransactionsCrypto_Endpoint, V1), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkCryptoFiatTransaction[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkCryptoFiatTransaction[]>>(SingleApi.GetUri(V1_TransactionsCrypto_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkCryptoFiatTransaction[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkCryptoFiatTransaction[]> GetFiatTransactions(string[] symbol = null, BtcTurkOrderSide[] type = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default) => GetFiatTransactionsAsync(symbol, type, startTime, endTime,ct).Result;
+        public WebCallResult<BtcTurkCryptoFiatTransaction[]> GetFiatTransactions(string[] symbol = null, BtcTurkOrderSide[] type = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default) => GetFiatTransactionsAsync(symbol, type, startTime, endTime, ct).Result;
         public async Task<WebCallResult<BtcTurkCryptoFiatTransaction[]>> GetFiatTransactionsAsync(string[] symbol = null, BtcTurkOrderSide[] type = null, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>();
@@ -381,38 +380,40 @@ namespace BtcTurk.Net
             parameters.AddOptionalParameter("startTime", startTime != null ? ToUnixTimestamp(startTime.Value).ToString() : null);
             parameters.AddOptionalParameter("endTime", endTime != null ? ToUnixTimestamp(endTime.Value).ToString() : null);
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkCryptoFiatTransaction[]>>(GetUrl(V1_TransactionsFiat_Endpoint, V1), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkCryptoFiatTransaction[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkCryptoFiatTransaction[]>>(SingleApi.GetUri(V1_TransactionsFiat_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkCryptoFiatTransaction[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
         #endregion
 
         #region Exchange
-        public WebCallResult<BtcTurkCommission> GetExchangeCommissions( CancellationToken ct = default) => GetExchangeCommissionsAsync(ct).Result;
-        public async Task<WebCallResult<BtcTurkCommission>> GetExchangeCommissionsAsync( CancellationToken ct = default)
+        public WebCallResult<BtcTurkCommission> GetExchangeCommissions(CancellationToken ct = default) => GetExchangeCommissionsAsync(ct).Result;
+        public async Task<WebCallResult<BtcTurkCommission>> GetExchangeCommissionsAsync(CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkCommission>>(GetUrl(Exchange_Commissions_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken:ct, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkCommission>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkCommission>>(SingleApi.GetUri(Exchange_Commissions_Endpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkCommission>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkCommission>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkCommission>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
         #endregion
 
         #region Home
-        public WebCallResult<BtcTurkResources> GetResources(string language = "tr-TR", CancellationToken ct = default) => GetResourcesAsync(language,ct).Result;
+        public WebCallResult<BtcTurkResources> GetResources(string language = "tr-TR", CancellationToken ct = default) => GetResourcesAsync(language, ct).Result;
         public async Task<WebCallResult<BtcTurkResources>> GetResourcesAsync(string language = "tr-TR", CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<BtcTurkResources>(GetUrl(Home_ResourcesLanguage_Endpoint.Replace("{language}", language), NoVersion), method:HttpMethod.Get, cancellationToken: ct, checkResult:false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkResources>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkResources>(SingleApi.GetUri(Home_ResourcesLanguage_Endpoint.Replace("{language}", language), NoVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkResources>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
 
-            return new WebCallResult<BtcTurkResources>(result.ResponseStatusCode, result.ResponseHeaders, result.Data, null);
+            return result.As(result.Data);
         }
         #endregion
 
         #region OHLC
-        public WebCallResult<BtcTurkOhlc[]> GetOhlc(string pairSymbol, int last = 50, CancellationToken ct = default) => GetOhlcAsync(pairSymbol, last,ct).Result;
+        public WebCallResult<BtcTurkOhlc[]> GetOhlc(string pairSymbol, int last = 50, CancellationToken ct = default) => GetOhlcAsync(pairSymbol, last, ct).Result;
         public async Task<WebCallResult<BtcTurkOhlc[]>> GetOhlcAsync(string pairSymbol, int last = 50, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -421,24 +422,26 @@ namespace BtcTurk.Net
             };
             parameters.AddOptionalParameter("last", last);
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkOhlc[]>>(GetUrl(OhlcEndpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkOhlc[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOhlc[]>>(SingleApi.GetUri(OhlcEndpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkOhlc[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOhlc[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkOhlc[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
         public WebCallResult<BtcTurkOhlcVolumes[]> GetOhlcVolumesInBtc(CancellationToken ct = default) => GetOhlcVolumesInBtcAsync(ct).Result;
         public async Task<WebCallResult<BtcTurkOhlcVolumes[]>> GetOhlcVolumesInBtcAsync(CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkOhlcVolumes[]>>(GetUrl(OhlcVolumesInBtcEndpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkOhlcVolumes[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOhlcVolumes[]>>(SingleApi.GetUri(OhlcVolumesInBtcEndpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkOhlcVolumes[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOhlcVolumes[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkOhlcVolumes[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
         #endregion
 
         #region Order Book
-        public WebCallResult<BtcTurkOrderBook> GetOrderBook(string pairSymbol, int limit = 100, CancellationToken ct = default) => GetOrderBookAsync(pairSymbol, limit,ct).Result;
+        public WebCallResult<BtcTurkOrderBook> GetOrderBook(string pairSymbol, int limit = 100, CancellationToken ct = default) => GetOrderBookAsync(pairSymbol, limit, ct).Result;
         public async Task<WebCallResult<BtcTurkOrderBook>> GetOrderBookAsync(string pairSymbol, int limit = 100, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -447,10 +450,11 @@ namespace BtcTurk.Net
                 { "limit", limit },
             };
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkOrderBook>>(GetUrl(OrderBook_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkOrderBook>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOrderBook>>(SingleApi.GetUri(OrderBook_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkOrderBook>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOrderBook>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkOrderBook>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
         #endregion
 
@@ -458,13 +462,13 @@ namespace BtcTurk.Net
         public WebCallResult<BtcTurkPriceGraphConfig> GetPriceGraphConfig(CancellationToken ct = default) => GetPriceGraphConfigAsync(ct).Result;
         public async Task<WebCallResult<BtcTurkPriceGraphConfig>> GetPriceGraphConfigAsync(CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<BtcTurkPriceGraphConfig>(GetUrl(PriceGraph_Config_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkPriceGraphConfig>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkPriceGraphConfig>(SingleApi.GetUri(PriceGraph_Config_Endpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkPriceGraphConfig>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
 
-            return new WebCallResult<BtcTurkPriceGraphConfig>(result.ResponseStatusCode, result.ResponseHeaders, result.Data, null);
+            return result.As(result.Data);
         }
 
-        public WebCallResult<BtcTurkPriceGraphSymbolInfo> GetPriceGraphSymbolInfo(string group = "", CancellationToken ct = default) => GetPriceGraphSymbolInfoAsync(group,ct).Result;
+        public WebCallResult<BtcTurkPriceGraphSymbolInfo> GetPriceGraphSymbolInfo(string group = "", CancellationToken ct = default) => GetPriceGraphSymbolInfoAsync(group, ct).Result;
         public async Task<WebCallResult<BtcTurkPriceGraphSymbolInfo>> GetPriceGraphSymbolInfoAsync(string group = "", CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -472,13 +476,13 @@ namespace BtcTurk.Net
                 { "group", group },
             };
 
-            var result = await SendRequestAsync<BtcTurkPriceGraphSymbolInfo>(GetUrl(PriceGraph_SymbolInfo_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkPriceGraphSymbolInfo>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkPriceGraphSymbolInfo>(SingleApi.GetUri(PriceGraph_SymbolInfo_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkPriceGraphSymbolInfo>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
 
-            return new WebCallResult<BtcTurkPriceGraphSymbolInfo>(result.ResponseStatusCode, result.ResponseHeaders, result.Data, null);
+            return result.As(result.Data);
         }
 
-        public WebCallResult<BtcTurkPriceGraphSymbols> GetPriceGraphSymbols(string symbol, CancellationToken ct = default) => GetPriceGraphSymbolsAsync(symbol,ct).Result;
+        public WebCallResult<BtcTurkPriceGraphSymbols> GetPriceGraphSymbols(string symbol, CancellationToken ct = default) => GetPriceGraphSymbolsAsync(symbol, ct).Result;
         public async Task<WebCallResult<BtcTurkPriceGraphSymbols>> GetPriceGraphSymbolsAsync(string symbol, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -486,19 +490,19 @@ namespace BtcTurk.Net
                 { "symbol", symbol },
             };
 
-            var result = await SendRequestAsync<BtcTurkPriceGraphSymbols>(GetUrl(PriceGraph_Symbols_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkPriceGraphSymbols>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkPriceGraphSymbols>(SingleApi.GetUri(PriceGraph_Symbols_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkPriceGraphSymbols>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
 
-            return new WebCallResult<BtcTurkPriceGraphSymbols>(result.ResponseStatusCode, result.ResponseHeaders, result.Data, null);
+            return result.As(result.Data);
         }
 
-        public WebCallResult<BtcTurkKline[]> GetPriceGraphHistory(string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default) => GetPriceGraphHistoryAsync(symbol, period, startTime, endTime,ct).Result;
+        public WebCallResult<BtcTurkKline[]> GetPriceGraphHistory(string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default) => GetPriceGraphHistoryAsync(symbol, period, startTime, endTime, ct).Result;
         public async Task<WebCallResult<BtcTurkKline[]>> GetPriceGraphHistoryAsync(string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default)
         => await GetPriceGraphHistoryCoreAsync(PriceGraph_History_Endpoint, symbol, period, startTime, endTime);
 
-        public WebCallResult<BtcTurkKline[]> GetPriceGraphMobileHistory(string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default) => GetPriceGraphMobileHistoryAsync(symbol, period, startTime, endTime,ct).Result;
+        public WebCallResult<BtcTurkKline[]> GetPriceGraphMobileHistory(string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default) => GetPriceGraphMobileHistoryAsync(symbol, period, startTime, endTime, ct).Result;
         public async Task<WebCallResult<BtcTurkKline[]>> GetPriceGraphMobileHistoryAsync(string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default)
-        => await GetPriceGraphHistoryCoreAsync(PriceGraph_MobileHistory_Endpoint, symbol, period, startTime, endTime,ct);
+        => await GetPriceGraphHistoryCoreAsync(PriceGraph_MobileHistory_Endpoint, symbol, period, startTime, endTime, ct);
 
         protected virtual async Task<WebCallResult<BtcTurkKline[]>> GetPriceGraphHistoryCoreAsync(string endpoint, string symbol, BtcTurkPeriod period, DateTime? startTime = null, DateTime? endTime = null, CancellationToken ct = default)
         {
@@ -509,7 +513,7 @@ namespace BtcTurk.Net
             parameters.AddOptionalParameter("from", startTime != null ? startTime.Value.ToUnixTimeSeconds().ToString() : "1");
             parameters.AddOptionalParameter("to", endTime != null ? endTime.Value.ToUnixTimeSeconds().ToString() : DateTime.UtcNow.ToUnixTimeSeconds().ToString());
 
-            var result = await SendRequestAsync<BtcTurkKlineData>(GetUrl(endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
+            var result = await SingleApi.ExecuteAsync<BtcTurkKlineData>(SingleApi.GetUri(endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
             if (!result.Success || result.Data == null
                 || result.Data.Times == null
                 || result.Data.Opens == null
@@ -517,7 +521,7 @@ namespace BtcTurk.Net
                 || result.Data.Lows == null
                 || result.Data.Closes == null
                 || result.Data.Volumes == null)
-                return new WebCallResult<BtcTurkKline[]>(result.ResponseStatusCode, result.ResponseHeaders, null, result.Error);
+                return result.AsError<BtcTurkKline[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
 
             // Parse Result
             List<BtcTurkKline> response = new List<BtcTurkKline>();
@@ -540,30 +544,39 @@ namespace BtcTurk.Net
                 });
             }
 
-            return new WebCallResult<BtcTurkKline[]>(result.ResponseStatusCode, result.ResponseHeaders, response.ToArray(), null);
+            return result.As(response.ToArray());
         }
         #endregion
 
         #region Server
-        public WebCallResult<BtcTurkServerVersion> GetServerVersion( CancellationToken ct = default) => GetServerVersionAsync(ct).Result;
-        public async Task<WebCallResult<BtcTurkServerVersion>> GetServerVersionAsync( CancellationToken ct = default)
+        public WebCallResult<BtcTurkServerVersion> GetServerVersion(CancellationToken ct = default) => GetServerVersionAsync(ct).Result;
+        public async Task<WebCallResult<BtcTurkServerVersion>> GetServerVersionAsync(CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<BtcTurkServerVersion>(GetUrl(Server_Version_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkServerVersion>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkServerVersion>(SingleApi.GetUri(Server_Version_Endpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkServerVersion>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
 
-            return new WebCallResult<BtcTurkServerVersion>(result.ResponseStatusCode, result.ResponseHeaders, result.Data, null);
+            return result.As(result.Data);
         }
 
-        public WebCallResult<BtcTurkTime> GetServerTime( CancellationToken ct = default) => GetServerTimeAsync(ct).Result;
-        public async Task<WebCallResult<BtcTurkTime>> GetServerTimeAsync( CancellationToken ct = default)
+        public WebCallResult<BtcTurkTime> GetServerTime(CancellationToken ct = default) => GetServerTimeAsync(ct).Result;
+        public async Task<WebCallResult<BtcTurkTime>> GetServerTimeAsync(CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<BtcTurkTime>(GetUrl(Server_Time_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkTime>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkTime>(SingleApi.GetUri(Server_Time_Endpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkTime>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
 
-            return new WebCallResult<BtcTurkTime>(result.ResponseStatusCode, result.ResponseHeaders, result.Data, null);
+            return result.As(result.Data);
         }
 
-        public WebCallResult<int> GetServerMobileVersion(string os, string version, CancellationToken ct = default) => GetServerMobileVersionAsync(os, version,ct).Result;
+        internal WebCallResult<DateTime> GetTime(CancellationToken ct = default) => GetTimeAsync(ct).Result;
+        internal async Task<WebCallResult<DateTime>> GetTimeAsync(CancellationToken ct = default)
+        {
+            var result = await SingleApi.ExecuteAsync<BtcTurkTime>(SingleApi.GetUri(Server_Time_Endpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<DateTime>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+
+            return result.As(result.Data.ServerTime);
+        }
+
+        public WebCallResult<int> GetServerMobileVersion(string os, string version, CancellationToken ct = default) => GetServerMobileVersionAsync(os, version, ct).Result;
         public async Task<WebCallResult<int>> GetServerMobileVersionAsync(string os, string version, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -572,33 +585,35 @@ namespace BtcTurk.Net
                 { "ver", version },
             };
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<int>>(GetUrl(Server_MobileVersion_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken:ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<int>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<int>>(SingleApi.GetUri(Server_MobileVersion_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<int>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<int>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<int>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkServerExchangeInfo> GetServerExchangeInfo( CancellationToken ct = default) => GetServerExchangeInfoAsync(ct).Result;
-        public async Task<WebCallResult<BtcTurkServerExchangeInfo>> GetServerExchangeInfoAsync( CancellationToken ct = default)
+        public WebCallResult<BtcTurkServerExchangeInfo> GetServerExchangeInfo(CancellationToken ct = default) => GetServerExchangeInfoAsync(ct).Result;
+        public async Task<WebCallResult<BtcTurkServerExchangeInfo>> GetServerExchangeInfoAsync(CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkServerExchangeInfo>>(GetUrl(Server_ExchangeInfo_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkServerExchangeInfo>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkServerExchangeInfo>>(SingleApi.GetUri(Server_ExchangeInfo_Endpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkServerExchangeInfo>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkServerExchangeInfo>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkServerExchangeInfo>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkServerPing> GetServerPing( CancellationToken ct = default) => GetServerPingAsync(ct).Result;
-        public async Task<WebCallResult<BtcTurkServerPing>> GetServerPingAsync( CancellationToken ct = default)
+        public WebCallResult<BtcTurkServerPing> GetServerPing(CancellationToken ct = default) => GetServerPingAsync(ct).Result;
+        public async Task<WebCallResult<BtcTurkServerPing>> GetServerPingAsync(CancellationToken ct = default)
         {
-            var result = await SendRequestAsync<BtcTurkServerPing>(GetUrl(Server_Ping_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkServerPing>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkServerPing>(SingleApi.GetUri(Server_Ping_Endpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkServerPing>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
 
-            return new WebCallResult<BtcTurkServerPing>(result.ResponseStatusCode, result.ResponseHeaders, result.Data, null);
+            return result.As(result.Data);
         }
         #endregion
 
         #region Ticker
-        public WebCallResult<BtcTurkTicker[]> GetTicker(string pairSymbol = "", CancellationToken ct = default) => GetTickerAsync(pairSymbol,ct).Result;
+        public WebCallResult<BtcTurkTicker[]> GetTicker(string pairSymbol = "", CancellationToken ct = default) => GetTickerAsync(pairSymbol, ct).Result;
         public async Task<WebCallResult<BtcTurkTicker[]>> GetTickerAsync(string pairSymbol = "", CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -606,13 +621,14 @@ namespace BtcTurk.Net
                 { "pairSymbol", pairSymbol },
             };
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkTicker[]>>(GetUrl(Ticker_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkTicker[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTicker[]>>(SingleApi.GetUri(Ticker_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkTicker[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
 
-        public WebCallResult<BtcTurkTicker[]> GetTickerByCurrency(string currencySymbol, CancellationToken ct = default) => GetTickerByCurrencyAsync(currencySymbol,ct).Result;
+        public WebCallResult<BtcTurkTicker[]> GetTickerByCurrency(string currencySymbol, CancellationToken ct = default) => GetTickerByCurrencyAsync(currencySymbol, ct).Result;
         public async Task<WebCallResult<BtcTurkTicker[]>> GetTickerByCurrencyAsync(string currencySymbol, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -620,15 +636,16 @@ namespace BtcTurk.Net
                 { "symbol", currencySymbol },
             };
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkTicker[]>>(GetUrl(Ticker_Currency_Endpoint, PublicVersion), method: HttpMethod.Get, cancellationToken: ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkTicker[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTicker[]>>(SingleApi.GetUri(Ticker_Currency_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkTicker[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
         #endregion
 
         #region Trade
-        public WebCallResult<BtcTurkTrade[]> GetTradesV2(string pairSymbol/*, int last=50*/, CancellationToken ct = default) => GetTradesV2Async(pairSymbol/*, last*/,ct).Result;
+        public WebCallResult<BtcTurkTrade[]> GetTradesV2(string pairSymbol/*, int last=50*/, CancellationToken ct = default) => GetTradesV2Async(pairSymbol/*, last*/, ct).Result;
         public async Task<WebCallResult<BtcTurkTrade[]>> GetTradesV2Async(string pairSymbol/*, int last = 50*/, CancellationToken ct = default)
         {
             var parameters = new Dictionary<string, object>
@@ -637,60 +654,15 @@ namespace BtcTurk.Net
                 /*{ "last", last.ToString() },*/
             };
 
-            var result = await SendRequestAsync<BtcTurkApiResponse<BtcTurkTrade[]>>(GetUrl(TradesEndpoint, PublicVersion), method:HttpMethod.Get,cancellationToken:ct, parameters: parameters, checkResult: false).ConfigureAwait(false);
-            if (!result.Success) return WebCallResult<BtcTurkTrade[]>.CreateErrorResult(result.ResponseStatusCode, result.ResponseHeaders, result.Error);
+            var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTrade[]>>(SingleApi.GetUri(TradesEndpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
+            if (!result.Success) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
+            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
 
-            return new WebCallResult<BtcTurkTrade[]>(result.ResponseStatusCode, result.ResponseHeaders, result.Data.Data, null);
+            return result.As(result.Data.Data);
         }
         #endregion
 
         #region Private Methods
-        protected override IRequest ConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition parameterPosition, ArrayParametersSerialization arraySerialization, int requestId, Dictionary<string, string> additionalHeaders)
-        {
-            return this.BtcTurkConstructRequest(uri, method, parameters, signed, parameterPosition, arraySerialization, requestId, additionalHeaders);
-        }
-        protected virtual IRequest BtcTurkConstructRequest(Uri uri, HttpMethod method, Dictionary<string, object> parameters, bool signed, HttpMethodParameterPosition parameterPosition, ArrayParametersSerialization arraySerialization, int requestId, Dictionary<string, string> additionalHeaders)
-        {
-            if (parameters == null)
-                parameters = new Dictionary<string, object>();
-
-            var uriString = uri.ToString();
-            if (authProvider != null)
-                parameters = authProvider.AddAuthenticationToParameters(uriString, method, parameters, signed, parameterPosition, arraySerialization);
-
-            if ((method == HttpMethod.Get || method == HttpMethod.Delete|| parameterPosition == HttpMethodParameterPosition.InUri) && parameters?.Any() == true)
-                uriString += "?" + parameters.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
-
-            if (method == HttpMethod.Post && signed)
-            {
-                var uriParamNames = new[] { "AccessKeyId", "SignatureMethod", "SignatureVersion", "Timestamp", "Signature" };
-                var uriParams = parameters.Where(p => uriParamNames.Contains(p.Key)).ToDictionary(k => k.Key, k => k.Value);
-                uriString += "?" + uriParams.CreateParamString(true, ArrayParametersSerialization.MultipleValues);
-                parameters = parameters.Where(p => !uriParamNames.Contains(p.Key)).ToDictionary(k => k.Key, k => k.Value);
-            }
-
-            var request = RequestFactory.Create(method, uriString, requestId);
-            var contentType = requestBodyFormat == RequestBodyFormat.Json ? Constants.JsonContentHeader : Constants.FormContentHeader;
-            request.Accept = Constants.JsonContentHeader;
-            
-            var headers = new Dictionary<string, string>();
-            if (authProvider != null)
-                headers = authProvider.AddAuthenticationToHeaders(uriString, method, parameters!, signed, parameterPosition, arraySerialization);
-
-            foreach (var header in headers)
-                request.AddHeader(header.Key, header.Value);
-
-            if ((method == HttpMethod.Post || method == HttpMethod.Put) && parameterPosition != HttpMethodParameterPosition.InUri)
-            {
-                if (parameters?.Any() == true)
-                    WriteParamBody(request, parameters, contentType);
-                else
-                    request.SetContent("{}", contentType);
-            }
-
-            return request;
-        }
-
         protected override Error ParseErrorResponse(JToken error)
         {
             return this.BtcTurkParseErrorResponse(error);
@@ -703,21 +675,68 @@ namespace BtcTurk.Net
             return new ServerError($"{(string)error["code"]}, {(string)error["message"]}");
         }
 
-        protected virtual Uri GetUrl(string endpoint, string version = null)
-        {
-            return string.IsNullOrEmpty(version) ? new Uri($"{BaseAddress.TrimEnd('/')}/{endpoint}") : new Uri($"{BaseAddress.TrimEnd('/')}/v{version}/{endpoint}");
-        }
-
-        protected virtual void Configure(BtcTurkClientOptions options)
-        {
-        }
-
         protected static long ToUnixTimestamp(DateTime time)
         {
             return (long)(time - new DateTime(1970, 1, 1)).TotalMilliseconds;
         }
 
+        internal async Task<WebCallResult> ExecuteAsync(RestApiClient apiClient, Uri uri, HttpMethod method, CancellationToken ct, Dictionary<string, object> parameters = null, bool signed = false, HttpMethodParameterPosition? parameterPosition = null)
+        {
+            var result = await SendRequestAsync<object>(apiClient, uri, method, ct, parameters, signed, parameterPosition).ConfigureAwait(false);
+            if (!result) return result.AsDatalessError(result.Error!);
+
+            return result.AsDataless();
+        }
+
+        internal async Task<WebCallResult<T>> ExecuteAsync<T>(RestApiClient apiClient, Uri uri, HttpMethod method, CancellationToken ct, Dictionary<string, object> parameters = null, bool signed = false, int weight = 1, bool ignoreRatelimit = false, HttpMethodParameterPosition? parameterPosition = null) where T : class
+        {
+            var result = await SendRequestAsync<T>(apiClient, uri, method, ct, parameters, signed, parameterPosition, requestWeight: weight, ignoreRatelimit: ignoreRatelimit).ConfigureAwait(false);
+            if (!result) return result.AsError<T>(result.Error!);
+
+            return result.As(result.Data);
+        }
         #endregion
 
     }
+
+    public class BtcTurkClientSingleApi : RestApiClient
+    {
+        #region Internal Fields
+        internal readonly Log _log;
+        internal readonly BtcTurkClient _baseClient;
+        internal readonly BtcTurkClientOptions _options;
+        internal static TimeSyncState TimeSyncState = new TimeSyncState("BtcTurk One Api");
+        #endregion
+
+        internal BtcTurkClientSingleApi(Log log, BtcTurkClient baseClient, BtcTurkClientOptions options) : base(options, options.SingleApiOptions)
+        {
+            _baseClient = baseClient;
+            _options = options;
+            _log = log;
+        }
+
+        protected override AuthenticationProvider CreateAuthenticationProvider(ApiCredentials credentials)
+            => new BtcTurkAuthenticationProvider(credentials);
+
+        internal Task<WebCallResult> ExecuteAsync(Uri uri, HttpMethod method, CancellationToken ct, Dictionary<string, object> parameters = null, bool signed = false, HttpMethodParameterPosition? parameterPosition = null)
+         => _baseClient.ExecuteAsync(this, uri, method, ct, parameters, signed, parameterPosition: parameterPosition);
+
+        internal Task<WebCallResult<T>> ExecuteAsync<T>(Uri uri, HttpMethod method, CancellationToken ct, Dictionary<string, object> parameters = null, bool signed = false, int weight = 1, bool ignoreRatelimit = false, HttpMethodParameterPosition? parameterPosition = null) where T : class
+         => _baseClient.ExecuteAsync<T>(this, uri, method, ct, parameters, signed, weight, ignoreRatelimit: ignoreRatelimit, parameterPosition: parameterPosition);
+
+        internal Uri GetUri(string endpoint, string version = null)
+        {
+            return string.IsNullOrEmpty(version) ? new Uri($"{BaseAddress.TrimEnd('/')}/{endpoint}") : new Uri($"{BaseAddress.TrimEnd('/')}/v{version}/{endpoint}");
+        }
+
+        protected override Task<WebCallResult<DateTime>> GetServerTimestampAsync()
+             => _baseClient.GetTimeAsync();
+
+        public override TimeSyncInfo GetTimeSyncInfo()
+            => new TimeSyncInfo(_log, _options.SingleApiOptions.AutoTimestamp, _options.SingleApiOptions.TimestampRecalculationInterval, TimeSyncState);
+
+        public override TimeSpan GetTimeOffset()
+            => TimeSyncState.TimeOffset;
+    }
+
 }

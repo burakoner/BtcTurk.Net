@@ -1,4 +1,5 @@
-﻿using CryptoExchange.Net.Attributes;
+﻿using BtcTurk.Net.Converters;
+using CryptoExchange.Net.Attributes;
 using CryptoExchange.Net.Converters;
 using Newtonsoft.Json;
 using System;

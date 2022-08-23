@@ -33,39 +33,52 @@ namespace BtcTurk.Net.Objects.SocketObjects
         }
     }
 
-
-    /*
-    public class BtcTurkAuthenticatedRequest
+    public class BtcTurkSocketLoginRequest
     {
-        [JsonProperty("op")]
-        public string Operation { get; set; }
-        [JsonProperty("topic")]
-        public string Topic { get; set; }
-        [JsonProperty("cid")]
-        public new string Id { get; set; }
-
-        public BtcTurkAuthenticatedRequest(string id, string operation, string topic)
-        {
-            Id = id;
-            Operation = operation;
-            Topic = topic;
-        }
-    }
-
-    public class BtcTurkSubscribeRequest
-    {
-        [JsonProperty("sub")]
-        public string Topic { get; set; }
+        [JsonProperty("type")]
+        public int Type { get; set; }
+        
         [JsonProperty("id")]
-        public new string Id { get; set; }
+        public int Id { get; set; }
+        
+        [JsonProperty("token")]
+        public string Token { get; set; }
 
-        public BtcTurkSubscribeRequest(string id, string topic)
+        [JsonProperty("username")]
+        public string Username { get; set; }
+
+        public BtcTurkSocketLoginRequest(int type, int id, string token, string username)
         {
             Id = id;
-            Topic = topic;
+            Type = type;
+            Token = token;
+            Username = username;
+        }
+
+        public object[] RequestObject()
+        {
+            return new object[] { this.Type, this };
+        }
+
+        public string RequestString()
+        {
+            return JsonConvert.SerializeObject(this.RequestObject());
         }
     }
-    */
+    
+    public class BtcTurkSocketLoginResponse
+    {
+        [JsonProperty("type")]
+        public int Type { get; set; }
+        
+        [JsonProperty("id")]
+        public int Id { get; set; }
+        
+        [JsonProperty("ok")]
+        public bool OK { get; set; }
 
+        [JsonProperty("message")]
+        public string Message { get; set; }
+    }
 
 }

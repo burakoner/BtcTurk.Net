@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BtcTurk.Net
+namespace BtcTurk.Net.Helpers
 {
     public static class BtcTurkHelpers
     {
