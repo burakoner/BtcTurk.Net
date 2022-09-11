@@ -26,7 +26,7 @@ namespace BtcTurk.Net
     {
         #region Internal Fields
         internal BtcTurkSocketClientOptions Options { get; }
-        internal BtcTurkSocketClientSingleStream SingleSocket { get; }
+        internal BtcTurkSocketClientSingleStream SingleStream { get; }
         #endregion
 
         #region Constructor/Destructor
@@ -36,7 +36,7 @@ namespace BtcTurk.Net
 
         public BtcTurkSocketClient(BtcTurkSocketClientOptions options) : base("BtcTurk Stream Api", options)
         {
-            SingleSocket= AddApiClient(new BtcTurkSocketClientSingleStream(log, this, options));
+            SingleStream= AddApiClient(new BtcTurkSocketClientSingleStream(log, this, options));
         }
         #endregion
 
@@ -49,7 +49,7 @@ namespace BtcTurk.Net
         public virtual void SetApiCredentials(string apiKey, string apiSecret)
         {
             var credentials = new ApiCredentials(apiKey, apiSecret);
-            SingleSocket.SetApiCredentials(credentials);
+            SingleStream.SetApiCredentials(credentials);
         }
         #endregion
 
@@ -163,7 +163,7 @@ namespace BtcTurk.Net
 
         }
 
-        #region Private Methods
+        #region Protected Methods
         protected override async Task<CallResult<SocketConnection>> GetSocketConnection(SocketApiClient apiClient, string address, bool authenticated)
         {
             address = BtcTurkApiAddresses.Default.WebsocketAddress;
@@ -181,11 +181,11 @@ namespace BtcTurk.Net
 
         internal virtual Task<CallResult<T>> QueryAsync<T>(object request, bool authenticated)
         {
-            return QueryAsync<T>(this.SingleSocket, request, authenticated);
+            return QueryAsync<T>(this.SingleStream, request, authenticated);
         }
         internal virtual Task<CallResult<UpdateSubscription>> SubscribeAsync<T>(object request, string identifier, bool authenticated, Action<DataEvent<T>> dataHandler, CancellationToken ct)
         {
-            return SubscribeAsync(this.SingleSocket, request, identifier, authenticated, dataHandler, ct);
+            return SubscribeAsync(this.SingleStream, request, identifier, authenticated, dataHandler, ct);
         }
 
         protected override bool HandleQueryResponse<T>(SocketConnection s, object request, JToken data, out CallResult<T> callResult)

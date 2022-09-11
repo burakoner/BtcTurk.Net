@@ -662,7 +662,7 @@ namespace BtcTurk.Net
         }
         #endregion
 
-        #region Private Methods
+        #region Protected Methods
         protected override Error ParseErrorResponse(JToken error)
         {
             return this.BtcTurkParseErrorResponse(error);

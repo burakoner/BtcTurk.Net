@@ -5,8 +5,6 @@ namespace BtcTurk.Net.Objects.ClientObjects
 {
     public class BtcTurkSocketClientOptions : BaseSocketClientOptions
     {
-        public bool DemoTradingService { get; set; } = false;
-
         public static BtcTurkSocketClientOptions Default { get; set; } = new BtcTurkSocketClientOptions()
         {
             SocketSubscriptionsCombineTarget = 100,

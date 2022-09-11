@@ -13,9 +13,6 @@ namespace BtcTurk.Samples
     {
         static void Main(string[] args)
         {
-            // var ws = new BtcTurkSocketClient(new BtcTurkSocketClientOptions { LogLevel = LogLevel.Debug });
-            // var login = ws.Login("info@burakoner.com", "eyJhbGciOiJSUzI1NiIsImtpZCI6IkZDODQ4MjRCOEIyMDc3ODRGMTJGNTdCMTlCOEMyMTVCQTczREM0RjUiLCJ0eXAiOiJKV1QiLCJ4NXQiOiJfSVNDUzRzZ2Q0VHhMMWV4bTR3aFc2Yzl4UFUifQ.eyJuYmYiOjE2MzM4ODYzMDgsImV4cCI6MTYzMzg4OTkwOCwiaXNzIjoiaHR0cHM6Ly9zc28uYnRjdHVyay5jb20iLCJhdWQiOlsiaHR0cHM6Ly9zc28uYnRjdHVyay5jb20vcmVzb3VyY2VzIiwiQnRjVHJhZGVyQXBpIiwia3ljLWFwaSJdLCJjbGllbnRfaWQiOiJidGN0dXJrIiwic3ViIjoiMjUyMjI1IiwiYXV0aF90aW1lIjoxNjMzODg2MzA3LCJpZHAiOiJsb2NhbCIsIkFzcE5ldC5JZGVudGl0eS5TZWN1cml0eVN0YW1wIjoiUkxXSFoyS0UyNFlZSFJHVTVVNFFTWVVFWU9FN0VCVFciLCJwcmVmZXJyZWRfdXNlcm5hbWUiOiJpbmZvQGJ1cmFrb25lci5jb20iLCJlbWFpbCI6ImluZm9AYnVyYWtvbmVyLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJwaG9uZV9udW1iZXIiOiI1MzIzNTAwNjgyIiwicGhvbmVfbnVtYmVyX3ZlcmlmaWVkIjp0cnVlLCJ0ZmEiOiIxIiwibmFtZSI6IkJVUkFLIMOWTkVSIiwiYnJva2VyX2lkIjoiMSIsImxvY2FsX3VzZXIiOnRydWUsIm1lbWJlcl90eXBlIjoiRGVmYXVsdCIsImRldmljZV9pZCI6ImZlOWU0ZWRhMDgyNTdmZjFiZjQ5OTA2NDFhNGEyOWRjIiwic2NvcGUiOlsib3BlbmlkIiwib2ZmbGluZV9hY2Nlc3MiLCJreWMiXSwiYW1yIjpbInB3ZCJdfQ.QFIiPhUalxNV4XZCb2KgWDTcb3MXWfmTk660RtpOxRzTx6FlEZRdYoHbVELC_U_HYEDUlaeJbJu0rXHUsJmG95k-0SBJzV5RWs_oG_v9O8rV-e0JCh4zKT3p6-9wGG-kkSyvYEZ0Ud9ANn4BNemSRnPdiXGr2SL-RBuLpteDFKCVSBO_MdxwTP4OEiZdLPoPV10Ri4yZ6jpQzrovY_iG1WBGzPdnAGWlnpUougQwLFQPdDIL6DGaet0P7XMw3lkmK5UGSUnQD7rkDJWJT-xV2fpgHyButZH-Dcc7fP-AQM6RaglWMvkRaSlD2CqvHFe-6UbKE-ndwwIjgUOcJlbx2g").Result;
-
             var pairs = new List<string> {
                 "ATOMTRY","BTCTRY","DASHTRY","EOSTRY","ETHTRY","LINKTRY","LTCTRY","NEOTRY","USDTTRY","XLMTRY","XRPTRY","XTZTRY",
                 "ATOMUSDT","BTCUSDT","DASHUSDT","EOSUSDT","ETHUSDT","LINKUSDT","LTCUSDT","NEOUSDT","XLMUSDT","XRPUSDT","XTZUSDT",
