@@ -68,5 +68,12 @@ namespace BtcTurk.Net.Helpers
         {
             return Array.IndexOf(values, @this) != -1;
         }
+
+        public static int ToInt32Safe(this string @this)
+        {
+            var intValue = 0;
+            if (!string.IsNullOrEmpty(@this)) int.TryParse(@this, out intValue);
+            return intValue;
+        }
     }
 }

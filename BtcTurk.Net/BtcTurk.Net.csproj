@@ -2,16 +2,16 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
   
   <PropertyGroup>
     <PackageId>BtcTurk.Net</PackageId>
     <Authors>Burak Öner</Authors>
-    <Version>2.6.0</Version>
-    <FileVersion>2.6.0</FileVersion>
-    <PackageVersion>2.6.0</PackageVersion>
-    <AssemblyVersion>2.6.0</AssemblyVersion>
+    <Version>2.6.1</Version>
+    <FileVersion>2.6.1</FileVersion>
+    <PackageVersion>2.6.1</PackageVersion>
+    <AssemblyVersion>2.6.1</AssemblyVersion>
     <Description>BtcTurk.Net is a .Net wrapper for the BtcTurk API. It includes all features the API provides, REST API and Websocket, using clear and readable objects including but not limited to Reading market info, Placing and managing orders and Reading balances and funds</Description>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageTags>BtcTurk BtcTurk.Net C# .Net CryptoCurrency Exchange API wrapper</PackageTags>
@@ -19,8 +19,8 @@
     <NeutralLanguage>en</NeutralLanguage>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageReleaseNotes>
-		Version 2.6.0 - 23 Aug 2022
-		- Synced with CryptoExchange.Net v5.2.4
+		Version 2.6.1 - 14 Sep 2022
+		- Fixed ErrorCode Crushing
 	</PackageReleaseNotes>
     <PackageIcon>icon.png</PackageIcon>
     <PackageIconUrl />

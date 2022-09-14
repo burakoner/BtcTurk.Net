@@ -234,7 +234,7 @@ namespace BtcTurk.Net
         {
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkBalance[]>>(SingleApi.GetUri(V1_Balances_Endpoint, V1), method: HttpMethod.Get, ct, signed: true).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkBalance[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkBalance[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkBalance[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -255,7 +255,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkPlacedOrder>>(SingleApi.GetUri(V1_Order_Endpoint, V1), method: HttpMethod.Post, ct, parameters: parameters, signed: true).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkPlacedOrder>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkPlacedOrder>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkPlacedOrder>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -270,7 +270,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<object>>(SingleApi.GetUri(V1_Order_Endpoint, V1), method: HttpMethod.Delete, ct, parameters: parameters, signed: true).ConfigureAwait(false);
             if (!result.Success) return result.AsError<bool>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<bool>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<bool>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Success);
         }
@@ -290,7 +290,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOrder[]>>(SingleApi.GetUri(V1_AllOrders_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkOrder[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOrder[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkOrder[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -303,7 +303,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOpenOrders>>(SingleApi.GetUri(V1_OpenOrders_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkOpenOrders>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOpenOrders>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkOpenOrders>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -319,7 +319,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTrade[]>>(SingleApi.GetUri(V1_Trades_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -335,7 +335,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTransaction[]>>(SingleApi.GetUri(V1_TransactionsTrade_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkTransaction[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -350,7 +350,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkPairTransaction[]>>(SingleApi.GetUri(V1_TransactionsTradeByPair_Endpoint.Replace("{pairSymbol}", pairSymbol), V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkPairTransaction[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkPairTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkPairTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -366,7 +366,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkCryptoFiatTransaction[]>>(SingleApi.GetUri(V1_TransactionsCrypto_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -382,7 +382,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkCryptoFiatTransaction[]>>(SingleApi.GetUri(V1_TransactionsFiat_Endpoint, V1), method: HttpMethod.Get, ct, parameters: parameters, signed: true).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkCryptoFiatTransaction[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -395,7 +395,7 @@ namespace BtcTurk.Net
         {
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkCommission>>(SingleApi.GetUri(Exchange_Commissions_Endpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkCommission>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkCommission>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkCommission>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -424,7 +424,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOhlc[]>>(SingleApi.GetUri(OhlcEndpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkOhlc[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOhlc[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkOhlc[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -434,7 +434,7 @@ namespace BtcTurk.Net
         {
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOhlcVolumes[]>>(SingleApi.GetUri(OhlcVolumesInBtcEndpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkOhlcVolumes[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOhlcVolumes[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkOhlcVolumes[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -452,7 +452,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkOrderBook>>(SingleApi.GetUri(OrderBook_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkOrderBook>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkOrderBook>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkOrderBook>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -587,7 +587,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<int>>(SingleApi.GetUri(Server_MobileVersion_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
             if (!result.Success) return result.AsError<int>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<int>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<int>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -597,7 +597,7 @@ namespace BtcTurk.Net
         {
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkServerExchangeInfo>>(SingleApi.GetUri(Server_ExchangeInfo_Endpoint, PublicVersion), method: HttpMethod.Get, ct).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkServerExchangeInfo>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkServerExchangeInfo>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkServerExchangeInfo>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -623,7 +623,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTicker[]>>(SingleApi.GetUri(Ticker_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -638,7 +638,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTicker[]>>(SingleApi.GetUri(Ticker_Currency_Endpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkTicker[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
@@ -656,7 +656,7 @@ namespace BtcTurk.Net
 
             var result = await SingleApi.ExecuteAsync<BtcTurkApiResponse<BtcTurkTrade[]>>(SingleApi.GetUri(TradesEndpoint, PublicVersion), method: HttpMethod.Get, ct, parameters: parameters).ConfigureAwait(false);
             if (!result.Success) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Error.Code, result.Error.Message, result.Error.Data));
-            if (result.Data.ErrorCode > 0) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Data.ErrorCode, result.Data.ErrorMessage, null));
+            if (result.Data.ErrorCode != "SUCCESS" && result.Data.ErrorCode.ToInt32Safe() > 0) return result.AsError<BtcTurkTrade[]>(new BtcTurkApiError(result.Data.ErrorCode.ToInt32Safe(), result.Data.ErrorMessage, null));
 
             return result.As(result.Data.Data);
         }
