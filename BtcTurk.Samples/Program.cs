@@ -1,5 +1,6 @@
 ﻿using BtcTurk.Net;
 using BtcTurk.Net.Objects.ClientObjects;
+using BtcTurk.Net.Objects.RestApi;
 using BtcTurk.Net.Objects.SocketObjects;
 using CryptoExchange.Net.Sockets;
 using Microsoft.Extensions.Logging;
@@ -30,13 +31,13 @@ namespace BtcTurk.Samples
             var btc04 = apiClient.GetServerPing();
             var btc05 = apiClient.GetTicker("BTCTRY");
             var btc06 = apiClient.GetTradesV2("BTCTRY");
-            var btc07 = apiClient.GetPriceGraphHistory("BTCTRY", Net.Objects.BtcTurkPeriod.OneHour);
+            var btc07 = apiClient.GetPriceGraphHistory("BTCTRY", BtcTurkPeriod.OneHour);
             // ...
 
             // Private Api Endpoints:
             apiClient.SetApiCredentials("XXXXXXXX-API-KEY-XXXXXXXX", "XXXXXXXX-API-SECRET-XXXXXXXX");
             var btc11 = apiClient.GetBalances();
-            var btc12 = apiClient.PlaceOrder("BTCTRY", 1.0m, Net.Objects.BtcTurkOrderSide.Buy, Net.Objects.BtcTurkOrderMethod.Market);
+            var btc12 = apiClient.PlaceOrder("BTCTRY", 1.0m, BtcTurkOrderSide.Buy, BtcTurkOrderMethod.Market);
             // ...
 
             Console.ReadLine();
@@ -89,7 +90,7 @@ namespace BtcTurk.Samples
             /**/
             foreach (var pair in pairs)
             {
-                var subscription = sock.SubscribeToKlines(pair, Net.Objects.BtcTurkPeriod.OneMinute, (data) =>
+                var subscription = sock.SubscribeToKlines(pair, BtcTurkPeriod.OneMinute, (data) =>
                 {
                     if (data != null)
                     {

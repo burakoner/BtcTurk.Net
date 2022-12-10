@@ -333,6 +333,10 @@ foreach (var pair in pairs)
 ```
 
 ## Release Notes
+* Version 2.6.2 - 10 Dec 2022
+    * Synced with CryptoExchange.Net v5.3.1
+    * Fixed CancelOrder issue
+
 * Version 2.6.0 - 23 Aug 2022
     * Synced with CryptoExchange.Net v5.2.4
 
