@@ -24,4 +24,22 @@ public class BtcTurkSymbol
     public BtcTurkFilter[] Filters { get; set; }
     [JsonProperty(PropertyName = "orderMethods", ItemConverterType = typeof(SymbolMethodConverter))]
     public BtcTurkOrderMethod[] OrderMethods { get; set; }
+    [JsonProperty("displayFormat")]
+    public string DisplayFormat { get; set; }
+    [JsonProperty("commissionFromNumerator")]
+    public bool CommissionFromNumerator { get; set; }
+    [JsonProperty("order")]
+    public int OrderNumber { get; set; }
+    [JsonProperty("priceRounding")]
+    public bool PriceRounding { get; set; }
+    [JsonProperty("isNew")]
+    public bool IsNew { get; set; }
+    [JsonProperty("marketPriceWarningThresholdPercentage")]
+    public decimal? MarketPriceWarningThresholdPercentage { get; set; }
+    [JsonProperty("maximumOrderAmount")]
+    public decimal? MaximumOrderAmount { get; set; }
+    [JsonProperty("maximumLimitOrderPrice")]
+    public decimal? MaximumLimitOrderPrice { get; set; }
+    [JsonProperty("minimumLimitOrderPrice")]
+    public decimal? minimumLimitOrderPrice { get; set; }
 }

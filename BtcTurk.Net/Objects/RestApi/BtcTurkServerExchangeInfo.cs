@@ -10,4 +10,6 @@ public class BtcTurkServerExchangeInfo
     public BtcTurkSymbol[] Symbols { get; set; }
     [JsonProperty("currencies")]
     public BtcTurkCurrency[] Currencies { get; set; }
+    [JsonProperty("currencyOperationBlocks")]
+    public BtcTurkCurrencyOperationBlock[] CurrencyOperationBlocks { get; set; }
 }

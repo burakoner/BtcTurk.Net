@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documents", "Documents", "{
 		docs\WebSocket Feed 2.4.0.pdf = docs\WebSocket Feed 2.4.0.pdf
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BtcTurk.Api", "BtcTurk.Net\BtcTurk.Api.csproj", "{3FB7C8EB-0407-47DF-BC26-AAF9300C6986}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +38,10 @@ Global
 		{BF1970D3-0818-404C-ACDF-9F0D47B574EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF1970D3-0818-404C-ACDF-9F0D47B574EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF1970D3-0818-404C-ACDF-9F0D47B574EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FB7C8EB-0407-47DF-BC26-AAF9300C6986}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FB7C8EB-0407-47DF-BC26-AAF9300C6986}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FB7C8EB-0407-47DF-BC26-AAF9300C6986}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FB7C8EB-0407-47DF-BC26-AAF9300C6986}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

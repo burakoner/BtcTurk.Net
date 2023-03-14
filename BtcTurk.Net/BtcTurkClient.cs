@@ -686,7 +686,7 @@ public class BtcTurkClientSingleApi : RestApiClient
     public override TimeSyncInfo GetTimeSyncInfo()
         => new(_log, _options.SingleApiOptions.AutoTimestamp, _options.SingleApiOptions.TimestampRecalculationInterval, TimeSyncState);
 
-    public override TimeSpan GetTimeOffset()
+    public override TimeSpan? GetTimeOffset()
         => TimeSyncState.TimeOffset;
 
     protected override Error ParseErrorResponse(JToken error)

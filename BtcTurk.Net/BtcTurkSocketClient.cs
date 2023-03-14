@@ -436,7 +436,7 @@ public class BtcTurkSocketClientSingleStream : SocketApiClient
         */
 
         var result = false;
-        await connection.SendAndWaitAsync(unsub, TimeSpan.FromSeconds(10), data =>
+        await connection.SendAndWaitAsync(unsub, TimeSpan.FromSeconds(10), null, data =>
         {
             if (data.Type != JTokenType.Object)
                 return false;

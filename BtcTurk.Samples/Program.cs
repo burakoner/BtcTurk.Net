@@ -1,7 +1,6 @@
 ﻿using BtcTurk.Net;
-using BtcTurk.Net.Objects.ClientObjects;
+using BtcTurk.Net.Objects.Core;
 using BtcTurk.Net.Objects.RestApi;
-using BtcTurk.Net.Objects.SocketObjects;
 using CryptoExchange.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using System;
